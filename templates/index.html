@@ -461,7 +461,7 @@
         </div>
         <div class="form-group">
           <label>MBTI Type</label>
-          <select id="f-mbti">
+          <select id="f-mbti" onchange="updateTraitLabels()">
             {% for t in mbti_types %}
             <option value="{{ t }}">{{ t }}</option>
             {% endfor %}
@@ -562,6 +562,20 @@
 </div>
 
 <script>
+  function updateTraitLabels() {
+  const mbti = document.getElementById('f-mbti').value;
+  const labels = {
+    introverted: mbti[0] === 'I' ? 'Introverted %' : 'Extroverted %',
+    intuitive:   mbti[1] === 'N' ? 'Intuitive %'   : 'Sensing %',
+    thinking:    mbti[2] === 'T' ? 'Thinking %'    : 'Feeling %',
+    judging:     mbti[3] === 'J' ? 'Judging %'     : 'Perceiving %',
+  };
+  
+  document.querySelectorAll('.trait-label')[0].textContent = labels.introverted;
+  document.querySelectorAll('.trait-label')[1].textContent = labels.intuitive;
+  document.querySelectorAll('.trait-label')[2].textContent = labels.thinking;
+  document.querySelectorAll('.trait-label')[3].textContent = labels.judging;
+}
 const MBTI_DESC = {
   INTJ:"Architect",INTP:"Logician",ENTJ:"Commander",ENTP:"Debater",
   INFJ:"Advocate",INFP:"Mediator",ENFJ:"Protagonist",ENFP:"Campaigner",
@@ -790,6 +804,8 @@ async function doSuggest() {
   `;
 }
 
+loadFriends();
+updateTraitLabels();
 loadFriends();
 </script>
 </body>
