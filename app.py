@@ -34,17 +34,19 @@ RARITY = {
     "ISTJ": 12, "ISFJ": 13, "ESTJ": 9, "ESFJ": 12,
     "ISTP": 5, "ISFP": 6, "ESTP": 5, "ESFP": 7,
 }
+JSONBIN_KEY = os.environ.get('JSONBIN_KEY')
+JSONBIN_ID = os.environ.get('JSONBIN_ID')
+JSONBIN_URL = f"https://api.jsonbin.io/v3/b/{JSONBIN_ID}"
 
 def load_data():
-    if not os.path.exists(DATA_FILE):
-        return {"friends": []}
-    with open(DATA_FILE) as f:
-        return json.load(f)
+    res = requests.get(JSONBIN_URL, headers={"X-Master-Key": JSONBIN_KEY})
+    return res.json()['record']
 
 def save_data(data):
-    with open(DATA_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
-
+    requests.put(JSONBIN_URL, json=data, headers={
+        "Content-Type": "application/json",
+        "X-Master-Key": JSONBIN_KEY
+    })
 def compute_compatibility(a, b):
     scores = {}
     traits = ['introverted', 'intuitive', 'thinking', 'judging', 'assertive']
@@ -71,8 +73,9 @@ def ollama_analyze(prompt):
         res = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
             headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {os.environ.get('GROQ_API_KEY')}"
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {os.environ.get('GROQ_API_KEY')}"
+},
             json={
                 "model": "llama-3.1-8b-instant",
                 "messages": [{"role": "user", "content": prompt}],
