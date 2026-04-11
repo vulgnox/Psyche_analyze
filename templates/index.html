@@ -469,7 +469,7 @@
         </div>
         <div class="form-group">
           <label>Variant</label>
-          <select id="f-variant">
+          <select id="f-variant" onchange="updateTraitLabels()">
             <option value="A">Assertive (A)</option>
             <option value="T">Turbulent (T)</option>
           </select>
@@ -503,7 +503,7 @@
           <span class="trait-val" id="v-judging">50</span>
         </div>
         <div class="trait-row">
-          <span class="trait-label">Assertive %</span>
+          <span class="trait-label" id="label-assertive">Assertive %</span>
           <input type="range" min="0" max="100" value="50" id="t-assertive" oninput="updateVal('assertive',this.value)">
           <span class="trait-val" id="v-assertive">50</span>
         </div>
@@ -568,6 +568,8 @@
   document.getElementById('label-intuitive').textContent   = mbti[1] === 'N' ? 'Intuitive %'   : 'Sensing %';
   document.getElementById('label-thinking').textContent    = mbti[2] === 'T' ? 'Thinking %'    : 'Feeling %';
   document.getElementById('label-judging').textContent     = mbti[3] === 'J' ? 'Judging %'     : 'Perceiving %';
+  const variant = document.getElementById('f-variant').value;
+  document.getElementById('label-assertive').textContent   = variant === 'A' ? 'Assertive %'   : 'Turbulent %';
 }
 const MBTI_DESC = {
   INTJ:"Architect",INTP:"Logician",ENTJ:"Commander",ENTP:"Debater",
