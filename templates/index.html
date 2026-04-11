@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSYCHE</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080a0e;
+    --bg2: #0d1017;
+    --bg3: #131820;
+    --border: #1e2530;
+    --accent: #e8c547;
+    --accent2: #4f8ef7;
+    --accent3: #e05a5a;
+    --text: #c8d0dc;
+    --text-dim: #5a6478;
+    --text-bright: #eef2f8;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  .header h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+
+  .header span {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 73px);
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--text-dim);
+    padding: 10px 14px;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .nav-btn:hover { color: var(--text); border-color: var(--border); }
+  .nav-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(232,197,71,0.05); }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+  }
+
+  .friend-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+
+  .friend-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .friend-chip:hover { border-color: var(--accent2); }
+
+  .friend-chip .name { color: var(--text-bright); font-size: 12px; }
+  .friend-chip .type { color: var(--accent2); font-size: 10px; }
+  .friend-chip .del { color: var(--text-dim); cursor: pointer; font-size: 14px; opacity: 0; transition: 0.15s; }
+  .friend-chip:hover .del { opacity: 1; }
+
+  .main {
+    padding: 32px 40px;
+    max-width: 900px;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .panel-title {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .panel-sub {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    margin-bottom: 28px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  input, select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text-bright);
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--bg3); }
+
+  .trait-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .trait-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 50px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .trait-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    height: 4px;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  input[type=range]:focus { border-color: var(--accent); }
+
+  .trait-val { color: var(--accent); font-size: 12px; text-align: right; }
+
+  .btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 11px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .btn:hover { background: #f0d060; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-outline {
+    background: none;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+    padding: 10px 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .btn-outline:hover { background: rgba(79,142,247,0.1); }
+
+  .select-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 24px;
+  }
+
+  .select-row .form-group { flex: 1; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .compat-score {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .compat-num {
+    font-family: var(--sans);
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .compat-label { color: var(--text-dim); font-size: 11px; letter-spacing: 0.1em; }
+
+  .compat-bar-wrap { margin-bottom: 20px; }
+  .compat-bar-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .compat-bar-label span { font-size: 10px; letter-spacing: 0.06em; color: var(--text-dim); }
+
+  .compat-bar {
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .compat-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .analysis-text {
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 12px;
+    white-space: pre-wrap;
+    border-left: 2px solid var(--accent);
+    padding-left: 16px;
+  }
+
+  .profiles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .profile-mini {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 2px;
+  }
+
+  .profile-mini .pname {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+  }
+
+  .profile-mini .ptype { color: var(--accent); font-size: 12px; letter-spacing: 0.06em; }
+  .profile-mini .pdesc { color: var(--text-dim); font-size: 11px; margin-top: 6px; }
+  .profile-mini .prarity { color: var(--accent3); font-size: 10px; margin-top: 4px; }
+
+  .pair-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .pair-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .pair-card:hover { border-color: var(--accent2); }
+
+  .pair-names { font-size: 12px; color: var(--text-bright); margin-bottom: 6px; }
+  .pair-score { font-family: var(--sans); font-size: 24px; font-weight: 800; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    border-radius: 2px;
+    margin-right: 4px;
+  }
+
+  .tag-yellow { background: rgba(232,197,71,0.12); color: var(--accent); border: 1px solid rgba(232,197,71,0.3); }
+  .tag-blue { background: rgba(79,142,247,0.12); color: var(--accent2); border: 1px solid rgba(79,142,247,0.3); }
+  .tag-red { background: rgba(224,90,90,0.12); color: var(--accent3); border: 1px solid rgba(224,90,90,0.3); }
+
+  .loading {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 20px 0;
+    animation: pulse 1.5s ease infinite;
+  }
+
+  @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  .empty { color: var(--text-dim); font-size: 11px; letter-spacing: 0.08em; padding: 16px 0; }
+
+  .success { color: #5adb8a; font-size: 11px; margin-top: 8px; }
+  .error { color: var(--accent3); font-size: 11px; margin-top: 8px; }
+
+  .suggest-select {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .suggest-chip {
+    padding: 6px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .suggest-chip.selected {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(79,142,247,0.08);
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PSYCHE</h1>
+  <span>personality engine</span>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <button class="nav-btn active" onclick="showPanel('add')">+ Add Profile</button>
+    <button class="nav-btn" onclick="showPanel('compare')">Compare</button>
+    <button class="nav-btn" onclick="showPanel('group')">Group Analysis</button>
+    <button class="nav-btn" onclick="showPanel('suggest')">Suggest Roles</button>
+
+    <div class="nav-divider"></div>
+    <div style="font-size:10px;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:4px;">PROFILES</div>
+    <div class="friend-list" id="friendList">
+      <div class="empty">no profiles yet</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ADD PANEL -->
+    <div class="panel active" id="panel-add">
+      <div class="panel-title">Add Profile</div>
+      <div class="panel-sub">enter personality data for a friend</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="f-name" placeholder="Pritam">
+        </div>
+        <div class="form-group">
+          <label>MBTI Type</label>
+          <select id="f-mbti">
+            {% for t in mbti_types %}
+            <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Variant</label>
+          <select id="f-variant">
+            <option value="A">Assertive (A)</option>
+            <option value="T">Turbulent (T)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Role / Notes (optional)</label>
+          <input type="text" id="f-notes" placeholder="close friend, batchmate...">
+        </div>
+      </div>
+
+      <div class="section-label">Trait Scores</div>
+      <div class="trait-group">
+        <div class="trait-row">
+          <span class="trait-label">Introverted %</span>
+          <input type="range" min="0" max="100" value="50" id="t-introverted" oninput="updateVal('introverted',this.value)">
+          <span class="trait-val" id="v-introverted">50</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Intuitive %</span>
+          <input type="range" min="0" max="100" value="50" id="t-intuitive" oninput="updateVal('intuitive',this.value)">
+          <span class="trait-val" id="v-intuitive">50</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Thinking %</span>
+          <input type="range" min="0" max="100" value="50" id="t-thinking" oninput="updateVal('thinking',this.value)">
+          <span class="trait-val" id="v-thinking">50</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Judging %</span>
+          <input type="range" min="0" max="100" value="50" id="t-judging" oninput="updateVal('judging',this.value)">
+          <span class="trait-val" id="v-judging">50</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Assertive %</span>
+          <input type="range" min="0" max="100" value="50" id="t-assertive" oninput="updateVal('assertive',this.value)">
+          <span class="trait-val" id="v-assertive">50</span>
+        </div>
+      </div>
+
+      <button class="btn" onclick="addFriend()">Save Profile</button>
+      <div id="add-msg"></div>
+    </div>
+
+    <!-- COMPARE PANEL -->
+    <div class="panel" id="panel-compare">
+      <div class="panel-title">Compare</div>
+      <div class="panel-sub">head-to-head personality analysis</div>
+
+      <div class="select-row">
+        <div class="form-group">
+          <label>Person A</label>
+          <select id="cmp-a"></select>
+        </div>
+        <div class="form-group">
+          <label>Person B</label>
+          <select id="cmp-b"></select>
+        </div>
+        <button class="btn" onclick="doCompare()">Analyze</button>
+      </div>
+
+      <div id="compare-result"></div>
+    </div>
+
+    <!-- GROUP PANEL -->
+    <div class="panel" id="panel-group">
+      <div class="panel-title">Group Analysis</div>
+      <div class="panel-sub">how everyone fits together</div>
+      <button class="btn" onclick="doGroup()">Run Analysis</button>
+      <div style="margin-top:24px;" id="group-result"></div>
+    </div>
+
+    <!-- SUGGEST PANEL -->
+    <div class="panel" id="panel-suggest">
+      <div class="panel-title">Suggest Roles</div>
+      <div class="panel-sub">select people and a context</div>
+
+      <div class="section-label">Select People</div>
+      <div class="suggest-select" id="suggest-chips"></div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Context</label>
+        <input type="text" id="suggest-ctx" placeholder="building a startup, working on a project, studying together...">
+      </div>
+
+      <button class="btn" onclick="doSuggest()">Get Suggestions</button>
+      <div style="margin-top:24px;" id="suggest-result"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const MBTI_DESC = {
+  INTJ:"Architect",INTP:"Logician",ENTJ:"Commander",ENTP:"Debater",
+  INFJ:"Advocate",INFP:"Mediator",ENFJ:"Protagonist",ENFP:"Campaigner",
+  ISTJ:"Logistician",ISFJ:"Defender",ESTJ:"Executive",ESFJ:"Consul",
+  ISTP:"Virtuoso",ISFP:"Adventurer",ESTP:"Entrepreneur",ESFP:"Entertainer"
+};
+
+const RARITY = {
+  INTJ:2,INFJ:2,ENTJ:3,ENFJ:3,INTP:4,INFP:5,ENTP:4,ENFP:7,
+  ISTJ:12,ISFJ:13,ESTJ:9,ESFJ:12,ISTP:5,ISFP:6,ESTP:5,ESFP:7
+};
+
+function scoreColor(s) {
+  if (s >= 75) return '#5adb8a';
+  if (s >= 50) return '#e8c547';
+  return '#e05a5a';
+}
+
+function updateVal(trait, val) {
+  document.getElementById('v-' + trait).textContent = val;
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'compare') populateSelects();
+  if (id === 'suggest') populateSuggestChips();
+}
+
+let friends = [];
+
+async function loadFriends() {
+  const res = await fetch('/api/friends');
+  friends = await res.json();
+  renderFriendList();
+}
+
+function renderFriendList() {
+  const el = document.getElementById('friendList');
+  if (!friends.length) { el.innerHTML = '<div class="empty">no profiles yet</div>'; return; }
+  el.innerHTML = friends.map(f => `
+    <div class="friend-chip">
+      <div>
+        <div class="name">${f.name}</div>
+        <div class="type">${f.mbti}-${f.variant || '?'}</div>
+      </div>
+      <span class="del" onclick="deleteFriend('${f.name}')">×</span>
+    </div>
+  `).join('');
+}
+
+async function deleteFriend(name) {
+  await fetch('/api/friends/' + name, { method: 'DELETE' });
+  await loadFriends();
+}
+
+async function addFriend() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { document.getElementById('add-msg').innerHTML = '<div class="error">name required</div>'; return; }
+
+  const friend = {
+    name,
+    mbti: document.getElementById('f-mbti').value,
+    variant: document.getElementById('f-variant').value,
+    notes: document.getElementById('f-notes').value,
+    traits: {
+      introverted: +document.getElementById('t-introverted').value,
+      intuitive: +document.getElementById('t-intuitive').value,
+      thinking: +document.getElementById('t-thinking').value,
+      judging: +document.getElementById('t-judging').value,
+      assertive: +document.getElementById('t-assertive').value,
+    }
+  };
+
+  await fetch('/api/friends', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(friend)
+  });
+
+  document.getElementById('add-msg').innerHTML = '<div class="success">saved — ' + name + '</div>';
+  document.getElementById('f-name').value = '';
+  await loadFriends();
+}
+
+function populateSelects() {
+  ['cmp-a','cmp-b'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = friends.map(f => `<option value="${f.name}">${f.name} (${f.mbti})</option>`).join('');
+  });
+}
+
+function populateSuggestChips() {
+  const el = document.getElementById('suggest-chips');
+  el.innerHTML = friends.map(f => `
+    <div class="suggest-chip" onclick="toggleChip(this,'${f.name}')" data-name="${f.name}">
+      ${f.name} · ${f.mbti}
+    </div>
+  `).join('');
+}
+
+function toggleChip(el, name) {
+  el.classList.toggle('selected');
+}
+
+async function doCompare() {
+  const a = document.getElementById('cmp-a').value;
+  const b = document.getElementById('cmp-b').value;
+  if (a === b) { document.getElementById('compare-result').innerHTML = '<div class="error">select two different people</div>'; return; }
+
+  document.getElementById('compare-result').innerHTML = '<div class="loading">// analyzing...</div>';
+
+  const res = await fetch('/api/compare', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ a, b })
+  });
+  const data = await res.json();
+
+  const sc = data.compatibility.overall;
+  const col = scoreColor(sc);
+
+  const traits = ['introverted','intuitive','thinking','judging','assertive'];
+
+  document.getElementById('compare-result').innerHTML = `
+    <div class="card">
+      <div class="profiles-grid">
+        <div class="profile-mini">
+          <div class="pname">${data.a.name}</div>
+          <div class="ptype">${data.a.mbti}-${data.a.variant || '?'} · ${MBTI_DESC[data.a.mbti] || ''}</div>
+          <div class="prarity">~${RARITY[data.a.mbti] || '?'}% of population</div>
+        </div>
+        <div class="profile-mini">
+          <div class="pname">${data.b.name}</div>
+          <div class="ptype">${data.b.mbti}-${data.b.variant || '?'} · ${MBTI_DESC[data.b.mbti] || ''}</div>
+          <div class="prarity">~${RARITY[data.b.mbti] || '?'}% of population</div>
+        </div>
+      </div>
+
+      <div class="compat-score">
+        <div class="compat-num" style="color:${col}">${sc}</div>
+        <div class="compat-label">% COMPATIBILITY</div>
+      </div>
+
+      <div class="compat-bar-wrap">
+        ${traits.map(t => `
+          <div class="compat-bar-label">
+            <span>${t}</span>
+            <span>${data.compatibility.by_trait[t]}%</span>
+          </div>
+          <div class="compat-bar">
+            <div class="compat-bar-fill" style="width:${data.compatibility.by_trait[t]}%;background:${scoreColor(data.compatibility.by_trait[t])}"></div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="section-label">AI Analysis</div>
+      <div class="analysis-text">${data.analysis}</div>
+    </div>
+  `;
+}
+
+async function doGroup() {
+  if (friends.length < 2) {
+    document.getElementById('group-result').innerHTML = '<div class="error">need at least 2 profiles</div>';
+    return;
+  }
+
+  document.getElementById('group-result').innerHTML = '<div class="loading">// analyzing group dynamics...</div>';
+
+  const res = await fetch('/api/group');
+  const data = await res.json();
+
+  document.getElementById('group-result').innerHTML = `
+    <div class="section-label">Pairwise Compatibility</div>
+    <div class="pair-grid">
+      ${data.pairs.map(p => `
+        <div class="pair-card" onclick="quickCompare('${p.a}','${p.b}')">
+          <div class="pair-names">${p.a} × ${p.b}</div>
+          <div class="pair-score" style="color:${scoreColor(p.score)}">${p.score}<span style="font-size:14px;color:var(--text-dim)">%</span></div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="card">
+      <div class="section-label">Group Dynamic</div>
+      <div class="analysis-text">${data.analysis}</div>
+    </div>
+  `;
+}
+
+function quickCompare(a, b) {
+  showPanel('compare');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn')[1].classList.add('active');
+  populateSelects();
+  document.getElementById('cmp-a').value = a;
+  document.getElementById('cmp-b').value = b;
+  doCompare();
+}
+
+async function doSuggest() {
+  const selected = [...document.querySelectorAll('.suggest-chip.selected')].map(c => c.dataset.name);
+  const ctx = document.getElementById('suggest-ctx').value || 'working together';
+
+  if (!selected.length) {
+    document.getElementById('suggest-result').innerHTML = '<div class="error">select at least one person</div>';
+    return;
+  }
+
+  document.getElementById('suggest-result').innerHTML = '<div class="loading">// thinking...</div>';
+
+  const res = await fetch('/api/suggest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ names: selected, context: ctx })
+  });
+  const data = await res.json();
+
+  document.getElementById('suggest-result').innerHTML = `
+    <div class="card">
+      <div class="section-label">Role Suggestions — ${ctx}</div>
+      <div class="analysis-text">${data.analysis}</div>
+    </div>
+  `;
+}
+
+loadFriends();
+</script>
+</body>
+</html>
