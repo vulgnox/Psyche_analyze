@@ -5,6 +5,7 @@ import requests
 
 app = Flask(__name__)
 DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'friends.json')
+os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "mistral"
 
@@ -71,8 +72,7 @@ def ollama_analyze(prompt):
             "https://api.groq.com/openai/v1/chat/completions",
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer {os.environ.get('GROQ_API_KEY')}"
-            },
+                "Authorization": f"Bearer {os.environ.get('GROQ_API_KEY')}"
             json={
                 "model": "llama-3.1-8b-instant",
                 "messages": [{"role": "user", "content": prompt}],
@@ -228,4 +228,4 @@ Brutally honest. No filler."""
 if __name__ == '__main__':
     os.makedirs('data', exist_ok=True)
     print("\n  PSYCHE running at http://localhost:5050\n")
-    app.run(debug=False, port=5050)
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5050)))
