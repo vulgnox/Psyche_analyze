@@ -483,22 +483,22 @@
       <div class="section-label">Trait Scores</div>
       <div class="trait-group">
         <div class="trait-row">
-          <span class="trait-label">Introverted %</span>
+          <span class="trait-label" id="label-introverted">Introverted %</span>
           <input type="range" min="0" max="100" value="50" id="t-introverted" oninput="updateVal('introverted',this.value)">
           <span class="trait-val" id="v-introverted">50</span>
         </div>
         <div class="trait-row">
-          <span class="trait-label">Intuitive %</span>
+          <span class="trait-label" id="label-intuitive">Intuitive %</span>
           <input type="range" min="0" max="100" value="50" id="t-intuitive" oninput="updateVal('intuitive',this.value)">
           <span class="trait-val" id="v-intuitive">50</span>
         </div>
         <div class="trait-row">
-          <span class="trait-label">Thinking %</span>
+          <span class="trait-label" id="label-thinking">Thinking %</span>
           <input type="range" min="0" max="100" value="50" id="t-thinking" oninput="updateVal('thinking',this.value)">
           <span class="trait-val" id="v-thinking">50</span>
         </div>
         <div class="trait-row">
-          <span class="trait-label">Judging %</span>
+          <span class="trait-label" id="label-judging">Judging %</span>
           <input type="range" min="0" max="100" value="50" id="t-judging" oninput="updateVal('judging',this.value)">
           <span class="trait-val" id="v-judging">50</span>
         </div>
@@ -564,17 +564,10 @@
 <script>
   function updateTraitLabels() {
   const mbti = document.getElementById('f-mbti').value;
-  const labels = {
-    introverted: mbti[0] === 'I' ? 'Introverted %' : 'Extroverted %',
-    intuitive:   mbti[1] === 'N' ? 'Intuitive %'   : 'Sensing %',
-    thinking:    mbti[2] === 'T' ? 'Thinking %'    : 'Feeling %',
-    judging:     mbti[3] === 'J' ? 'Judging %'     : 'Perceiving %',
-  };
-  
-  document.querySelectorAll('.trait-label')[0].textContent = labels.introverted;
-  document.querySelectorAll('.trait-label')[1].textContent = labels.intuitive;
-  document.querySelectorAll('.trait-label')[2].textContent = labels.thinking;
-  document.querySelectorAll('.trait-label')[3].textContent = labels.judging;
+  document.getElementById('label-introverted').textContent = mbti[0] === 'I' ? 'Introverted %' : 'Extroverted %';
+  document.getElementById('label-intuitive').textContent   = mbti[1] === 'N' ? 'Intuitive %'   : 'Sensing %';
+  document.getElementById('label-thinking').textContent    = mbti[2] === 'T' ? 'Thinking %'    : 'Feeling %';
+  document.getElementById('label-judging').textContent     = mbti[3] === 'J' ? 'Judging %'     : 'Perceiving %';
 }
 const MBTI_DESC = {
   INTJ:"Architect",INTP:"Logician",ENTJ:"Commander",ENTP:"Debater",
@@ -804,7 +797,7 @@ async function doSuggest() {
   `;
 }
 
-loadFriends();
+
 updateTraitLabels();
 loadFriends();
 </script>
