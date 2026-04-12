@@ -51,8 +51,11 @@ def login_required(f):
     return decorated
 
 def load_data():
-    res = requests.get(JSONBIN_URL, headers={"X-Master-Key": JSONBIN_KEY})
-    return res.json()['record']
+    try:
+        res = requests.get(JSONBIN_URL, headers={"X-Master-Key": JSONBIN_KEY})
+        return res.json()['record']
+    except Exception as e:
+        return {"friends": []}
 
 def save_data(data):
     requests.put(JSONBIN_URL, json=data, headers={
