@@ -8,6 +8,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'psyche-secret-change-this')
 APP_PASSWORD = os.environ.get('APP_PASSWORD', 'psyche123')
 
+
 DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'friends.json')
 os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
 
@@ -97,7 +98,7 @@ def ollama_analyze(prompt):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form.get('password') == APP_PASSWORD:
+        if request.form.get('password').strip() == APP_PASSWORD.strip():
             session['logged_in'] = True
             return redirect('/')
         return render_template('login.html', error="wrong password")
