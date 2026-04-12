@@ -469,7 +469,7 @@
         </div>
         <div class="form-group">
           <label>Variant</label>
-          <select id="f-variant" onchange="updateTraitLabels()">
+          <select id="f-variant">
             <option value="A">Assertive (A)</option>
             <option value="T">Turbulent (T)</option>
           </select>
@@ -483,27 +483,27 @@
       <div class="section-label">Trait Scores</div>
       <div class="trait-group">
         <div class="trait-row">
-          <span class="trait-label" id="label-introverted">Introverted %</span>
+          <span class="trait-label"><span class="trait-label" id="label-introverted">Introverted %</span>Introverted %</span>
           <input type="range" min="0" max="100" value="50" id="t-introverted" oninput="updateVal('introverted',this.value)">
           <span class="trait-val" id="v-introverted">50</span>
         </div>
         <div class="trait-row">
-          <span class="trait-label" id="label-intuitive">Intuitive %</span>
+          <span class="trait-label">Intuitive %</span>
           <input type="range" min="0" max="100" value="50" id="t-intuitive" oninput="updateVal('intuitive',this.value)">
           <span class="trait-val" id="v-intuitive">50</span>
         </div>
         <div class="trait-row">
-          <span class="trait-label" id="label-thinking">Thinking %</span>
+          <span class="trait-label">Thinking %</span>
           <input type="range" min="0" max="100" value="50" id="t-thinking" oninput="updateVal('thinking',this.value)">
           <span class="trait-val" id="v-thinking">50</span>
         </div>
         <div class="trait-row">
-          <span class="trait-label" id="label-judging">Judging %</span>
+          <span class="trait-label">Judging %</span>
           <input type="range" min="0" max="100" value="50" id="t-judging" oninput="updateVal('judging',this.value)">
           <span class="trait-val" id="v-judging">50</span>
         </div>
         <div class="trait-row">
-          <span class="trait-label" id="label-assertive">Assertive %</span>
+          <span class="trait-label">Assertive %</span>
           <input type="range" min="0" max="100" value="50" id="t-assertive" oninput="updateVal('assertive',this.value)">
           <span class="trait-val" id="v-assertive">50</span>
         </div>
@@ -799,7 +799,7 @@ async function doSuggest() {
   `;
 }
 
-
+loadFriends();
 updateTraitLabels();
 loadFriends();
 </script>

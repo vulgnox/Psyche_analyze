@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSYCHE — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080a0e;
+    --bg2: #0d1017;
+    --bg3: #131820;
+    --border: #1e2530;
+    --accent: #e8c547;
+    --accent2: #4f8ef7;
+    --accent3: #e05a5a;
+    --text: #c8d0dc;
+    --text-dim: #5a6478;
+    --text-bright: #eef2f8;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  .box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 360px;
+    border-radius: 2px;
+  }
+
+  .logo {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .sub {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-bottom: 36px;
+  }
+
+  label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  input[type=password] {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text-bright);
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 16px;
+  }
+
+  input[type=password]:focus { border-color: var(--accent); }
+
+  button {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    transition: background 0.15s;
+  }
+
+  button:hover { background: #f0d060; }
+
+  .error {
+    color: var(--accent3);
+    font-size: 11px;
+    margin-top: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  .hint {
+    color: var(--text-dim);
+    font-size: 10px;
+    margin-top: 24px;
+    letter-spacing: 0.06em;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">PSYCHE</div>
+  <div class="sub">personality engine — group access</div>
+
+  <form method="POST">
+    <label>Group Password</label>
+    <input type="password" name="password" placeholder="enter password" autofocus>
+    <button type="submit">Enter</button>
+    {% if error %}
+    <div class="error">// {{ error }}</div>
+    {% endif %}
+  </form>
+
+  <div class="hint">
+    don't have the password? ask your group.<br>
+    discord: <span style="color:var(--accent2)">vulgnox</span>
+  </div>
+</div>
+</body>
+</html>
