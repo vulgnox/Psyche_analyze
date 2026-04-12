@@ -33,6 +33,18 @@ python app.py
 
 Open `http://localhost:5050`
 
+## Get Your Personality Type
+
+Don't know your MBTI? Take the free official test:  
+🔗 **https://www.16personalities.com**
+
+Take the test, note your type (e.g. INTJ-A), and enter your trait percentages directly from your results page into PSYCHE.
+
 ## Deployed
 
 Live at: https://psyche-analyze.onrender.com
+
+
+## Contact
+
+Discord: **vulgnox**
