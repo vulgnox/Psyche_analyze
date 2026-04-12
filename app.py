@@ -1,12 +1,21 @@
-from flask import Flask, render_template, request, jsonify, session, redirect
+from flask import Flask, render_template, request, jsonify
 import json
 import os
 import requests
 from functools import wraps
+from flask import session, redirect
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'psyche-secret-change-this')
+app.secret_key = os.environ.get('SECRET_KEY', 'psyche-secret-2026')
 APP_PASSWORD = os.environ.get('APP_PASSWORD', 'psyche123')
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect('/login')
+        return f(*args, **kwargs)
+    return decorated
 
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'friends.json')
@@ -101,7 +110,7 @@ def ollama_analyze(prompt):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form.get('password').strip() == APP_PASSWORD.strip():
+        if request.form.get('password', '').strip() == APP_PASSWORD.strip():
             session['logged_in'] = True
             return redirect('/')
         return render_template('login.html', error="wrong password")
