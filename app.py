@@ -9,6 +9,57 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'psyche-secret-2026')
 APP_PASSWORD = os.environ.get('APP_PASSWORD', 'psyche123')
 
+# ── Storage ────────────────────────────────────────────────────────────────────
+DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'friends.json')
+os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+
+# JSONBin is optional — only used if both env vars are present
+JSONBIN_KEY = os.environ.get('JSONBIN_KEY')
+JSONBIN_ID  = os.environ.get('JSONBIN_ID')
+USE_JSONBIN = bool(JSONBIN_KEY and JSONBIN_ID)
+JSONBIN_URL = f"https://api.jsonbin.io/v3/b/{JSONBIN_ID}" if USE_JSONBIN else None
+
+def load_data():
+    # 1. Try JSONBin if configured
+    if USE_JSONBIN:
+        try:
+            res = requests.get(JSONBIN_URL, headers={"X-Master-Key": JSONBIN_KEY}, timeout=8)
+            res.raise_for_status()
+            return res.json().get('record', {"friends": []})
+        except Exception as e:
+            print(f"[WARN] JSONBin load failed: {e} — falling back to local file")
+
+    # 2. Fall back to local file
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[ERROR] Local file read failed: {e}")
+
+    return {"friends": []}
+
+def save_data(data):
+    # Always write local file first (fast, reliable)
+    try:
+        with open(DATA_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"[ERROR] Local file write failed: {e}")
+        raise RuntimeError(f"Could not save to disk: {e}")
+
+    # Then sync to JSONBin if configured
+    if USE_JSONBIN:
+        try:
+            res = requests.put(JSONBIN_URL, json=data, headers={
+                "Content-Type": "application/json",
+                "X-Master-Key": JSONBIN_KEY
+            }, timeout=8)
+            res.raise_for_status()
+        except Exception as e:
+            print(f"[WARN] JSONBin sync failed (data saved locally): {e}")
+
+# ── Auth ───────────────────────────────────────────────────────────────────────
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -17,10 +68,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated
 
-
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'friends.json')
-os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-
+# ── MBTI data ──────────────────────────────────────────────────────────────────
 MBTI_DESCRIPTIONS = {
     "INTJ": "Architect — strategic, independent, visionary",
     "INTP": "Logician — analytical, theoretical, flexible",
@@ -47,31 +95,7 @@ RARITY = {
     "ISTP": 5, "ISFP": 6, "ESTP": 5, "ESFP": 7,
 }
 
-JSONBIN_KEY = os.environ.get('JSONBIN_KEY')
-JSONBIN_ID = os.environ.get('JSONBIN_ID')
-JSONBIN_URL = f"https://api.jsonbin.io/v3/b/{JSONBIN_ID}"
-
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('logged_in'):
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated
-
-def load_data():
-    try:
-        res = requests.get(JSONBIN_URL, headers={"X-Master-Key": JSONBIN_KEY})
-        return res.json()['record']
-    except Exception as e:
-        return {"friends": []}
-
-def save_data(data):
-    requests.put(JSONBIN_URL, json=data, headers={
-        "Content-Type": "application/json",
-        "X-Master-Key": JSONBIN_KEY
-    })
-
+# ── Helpers ────────────────────────────────────────────────────────────────────
 def compute_compatibility(a, b):
     scores = {}
     traits = ['introverted', 'intuitive', 'thinking', 'judging', 'assertive']
@@ -107,6 +131,7 @@ def ollama_analyze(prompt):
     except Exception as e:
         return f"Analysis unavailable: {str(e)}"
 
+# ── Routes ─────────────────────────────────────────────────────────────────────
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -135,29 +160,37 @@ def get_friends():
 @app.route('/api/friends', methods=['POST'])
 @login_required
 def add_friend():
-    data = load_data()
-    friend = request.json
-    data['friends'] = [f for f in data['friends'] if f['name'].lower() != friend['name'].lower()]
-    data['friends'].append(friend)
-    save_data(data)
-    return jsonify({"status": "ok"})
+    try:
+        data = load_data()
+        friend = request.json
+        if not friend or not friend.get('name'):
+            return jsonify({"status": "error", "message": "name required"}), 400
+        data['friends'] = [f for f in data['friends'] if f['name'].lower() != friend['name'].lower()]
+        data['friends'].append(friend)
+        save_data(data)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/friends/<name>', methods=['DELETE'])
 @login_required
 def delete_friend(name):
-    data = load_data()
-    data['friends'] = [f for f in data['friends'] if f['name'].lower() != name.lower()]
-    save_data(data)
-    return jsonify({"status": "ok"})
+    try:
+        data = load_data()
+        data['friends'] = [f for f in data['friends'] if f['name'].lower() != name.lower()]
+        save_data(data)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/compare', methods=['POST'])
 @login_required
 def compare():
     body = request.json
     data = load_data()
-    friends = {f['name'].lower(): f for f in data['friends']}
-    a = friends.get(body['a'].lower())
-    b = friends.get(body['b'].lower())
+    friends_map = {f['name'].lower(): f for f in data['friends']}
+    a = friends_map.get(body['a'].lower())
+    b = friends_map.get(body['b'].lower())
     if not a or not b:
         return jsonify({"error": "Friend not found"}), 404
     compat = compute_compatibility(a, b)
@@ -218,8 +251,8 @@ def suggest():
     names = body.get('names', [])
     context = body.get('context', 'working together on a project')
     data = load_data()
-    friends = {f['name'].lower(): f for f in data['friends']}
-    selected = [friends[n.lower()] for n in names if n.lower() in friends]
+    friends_map = {f['name'].lower(): f for f in data['friends']}
+    selected = [friends_map[n.lower()] for n in names if n.lower() in friends_map]
     if not selected:
         return jsonify({"error": "No valid friends selected"}), 400
     profiles = "\n".join([f"- {f['name']}: {f['mbti']} ({f.get('variant','')})" for f in selected])
@@ -237,7 +270,18 @@ Brutally honest. No filler."""
     analysis = ollama_analyze(prompt)
     return jsonify({"analysis": analysis, "selected": selected})
 
+# ── Health check (useful for Render) ──────────────────────────────────────────
+@app.route('/api/health')
+def health():
+    data = load_data()
+    return jsonify({
+        "status": "ok",
+        "storage": "jsonbin+local" if USE_JSONBIN else "local",
+        "profiles": len(data.get('friends', []))
+    })
+
 if __name__ == '__main__':
     os.makedirs('data', exist_ok=True)
-    print("\n  PSYCHE running at http://localhost:5050\n")
+    print(f"\n  PSYCHE running at http://localhost:5050")
+    print(f"  Storage: {'JSONBin + local file' if USE_JSONBIN else 'local file only'}\n")
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5050)))
