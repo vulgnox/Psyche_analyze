@@ -4,573 +4,686 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PSYCHE</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #080a0e;
-    --bg2: #0d1017;
-    --bg3: #131820;
-    --border: #1e2530;
-    --accent: #e8c547;
-    --accent2: #4f8ef7;
-    --accent3: #e05a5a;
-    --text: #c8d0dc;
-    --text-dim: #5a6478;
-    --text-bright: #eef2f8;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Syne', sans-serif;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Noise overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.5;
-  }
-
-  .header {
-    border-bottom: 1px solid var(--border);
-    padding: 24px 40px;
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-  }
-
-  .header h1 {
-    font-family: var(--sans);
-    font-weight: 800;
-    font-size: 28px;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-  }
-
-  .header span {
-    color: var(--text-dim);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-  }
-
-  .layout {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    min-height: calc(100vh - 73px);
-  }
-
-  .sidebar {
-    border-right: 1px solid var(--border);
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .nav-btn {
-    background: none;
-    border: 1px solid transparent;
-    color: var(--text-dim);
-    padding: 10px 14px;
-    text-align: left;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    transition: all 0.15s;
-    border-radius: 2px;
-  }
-
-  .nav-btn:hover { color: var(--text); border-color: var(--border); }
-  .nav-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(232,197,71,0.05); }
-
-  .nav-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 8px 0;
-  }
-
-  .friend-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
-
-  .friend-chip {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 10px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .friend-chip:hover { border-color: var(--accent2); }
-
-  .friend-chip .name { color: var(--text-bright); font-size: 12px; }
-  .friend-chip .type { color: var(--accent2); font-size: 10px; }
-  .friend-chip .del { color: var(--text-dim); cursor: pointer; font-size: 14px; opacity: 0; transition: 0.15s; }
-  .friend-chip:hover .del { opacity: 1; }
-
-  .main {
-    padding: 32px 40px;
-    max-width: 900px;
-  }
-
-  .panel { display: none; }
-  .panel.active { display: block; animation: fadeIn 0.2s ease; }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-  .panel-title {
-    font-family: var(--sans);
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-bright);
-    margin-bottom: 8px;
-    letter-spacing: 0.05em;
-  }
-
-  .panel-sub {
-    color: var(--text-dim);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    margin-bottom: 28px;
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-group.full { grid-column: 1 / -1; }
-
-  label {
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-
-  input, select {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text-bright);
-    padding: 10px 12px;
-    font-family: var(--mono);
-    font-size: 13px;
-    border-radius: 2px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
-  input:focus, select:focus { border-color: var(--accent); }
-  select option { background: var(--bg3); }
-
-  .trait-group {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .trait-row {
-    display: grid;
-    grid-template-columns: 140px 1fr 50px;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .trait-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; }
-
-  input[type=range] {
-    -webkit-appearance: none;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    height: 4px;
-    padding: 0;
-    cursor: pointer;
-    border-radius: 2px;
-  }
-
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    background: var(--accent);
-    border-radius: 50%;
-    cursor: pointer;
-  }
-
-  input[type=range]:focus { border-color: var(--accent); }
-
-  .trait-val { color: var(--accent); font-size: 12px; text-align: right; }
-
-  .btn {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    padding: 11px 24px;
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 0.15s;
-    text-transform: uppercase;
-  }
-
-  .btn:hover { background: #f0d060; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .btn-outline {
-    background: none;
-    color: var(--accent2);
-    border: 1px solid var(--accent2);
-    padding: 10px 20px;
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 0.15s;
-    text-transform: uppercase;
-  }
-
-  .btn-outline:hover { background: rgba(79,142,247,0.1); }
-
-  .select-row {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    margin-bottom: 24px;
-  }
-
-  .select-row .form-group { flex: 1; }
-
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 24px;
-    margin-bottom: 16px;
-  }
-
-  .compat-score {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-
-  .compat-num {
-    font-family: var(--sans);
-    font-size: 56px;
-    font-weight: 800;
-    line-height: 1;
-  }
-
-  .compat-label { color: var(--text-dim); font-size: 11px; letter-spacing: 0.1em; }
-
-  .compat-bar-wrap { margin-bottom: 20px; }
-  .compat-bar-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .compat-bar-label span { font-size: 10px; letter-spacing: 0.06em; color: var(--text-dim); }
-
-  .compat-bar {
-    height: 3px;
-    background: var(--bg3);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-
-  .compat-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  .analysis-text {
-    color: var(--text);
-    line-height: 1.8;
-    font-size: 12px;
-    white-space: pre-wrap;
-    border-left: 2px solid var(--accent);
-    padding-left: 16px;
-  }
-
-  .profiles-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .profile-mini {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 16px;
-    border-radius: 2px;
-  }
-
-  .profile-mini .pname {
-    font-family: var(--sans);
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-bright);
-    margin-bottom: 4px;
-  }
-
-  .profile-mini .ptype { color: var(--accent); font-size: 12px; letter-spacing: 0.06em; }
-  .profile-mini .pdesc { color: var(--text-dim); font-size: 11px; margin-top: 6px; }
-  .profile-mini .prarity { color: var(--accent3); font-size: 10px; margin-top: 4px; }
-
-  .pair-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .pair-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 14px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .pair-card:hover { border-color: var(--accent2); }
-
-  .pair-names { font-size: 12px; color: var(--text-bright); margin-bottom: 6px; }
-  .pair-score { font-family: var(--sans); font-size: 24px; font-weight: 800; }
-
-  .tag {
-    display: inline-block;
-    padding: 2px 8px;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    border-radius: 2px;
-    margin-right: 4px;
-  }
-
-  .tag-yellow { background: rgba(232,197,71,0.12); color: var(--accent); border: 1px solid rgba(232,197,71,0.3); }
-  .tag-blue { background: rgba(79,142,247,0.12); color: var(--accent2); border: 1px solid rgba(79,142,247,0.3); }
-  .tag-red { background: rgba(224,90,90,0.12); color: var(--accent3); border: 1px solid rgba(224,90,90,0.3); }
-
-  .loading {
-    color: var(--text-dim);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    padding: 20px 0;
-    animation: pulse 1.5s ease infinite;
-  }
-
-  @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-  .empty { color: var(--text-dim); font-size: 11px; letter-spacing: 0.08em; padding: 16px 0; }
-
-  .success { color: #5adb8a; font-size: 11px; margin-top: 8px; }
-  .error { color: var(--accent3); font-size: 11px; margin-top: 8px; }
-
-  .suggest-select {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .suggest-chip {
-    padding: 6px 12px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    transition: all 0.15s;
-    user-select: none;
-  }
-
-  .suggest-chip.selected {
-    border-color: var(--accent2);
-    color: var(--accent2);
-    background: rgba(79,142,247,0.08);
-  }
-
-  .section-label {
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-  }
+:root {
+  --bg:       #060810;
+  --bg2:      #0c0f1a;
+  --bg3:      #111520;
+  --bg4:      #171c2a;
+  --bg5:      #1e243a;
+  --border:   #1f2740;
+  --border2:  #2a3450;
+  --accent:   #00e5ff;
+  --accent2:  #7c4dff;
+  --accent3:  #ff4d6d;
+  --green:    #00e676;
+  --yellow:   #ffd740;
+  --text:     #b0bcd4;
+  --text-dim: #44536e;
+  --text-hi:  #e8edf8;
+  --mono:     'IBM Plex Mono', monospace;
+  --display:  'Rajdhani', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Grid bg ── */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none; z-index:0;
+}
+
+/* ── Top bar ── */
+.topbar {
+  position:sticky; top:0; z-index:100;
+  background: rgba(6,8,16,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  color: var(--text-hi);
+  display:flex; align-items:center; gap:10px;
+}
+
+.logo-dot {
+  width:6px; height:6px;
+  background: var(--accent);
+  border-radius:50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse-dot 2s ease infinite;
+}
+
+@keyframes pulse-dot {
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%{ opacity:0.5; transform:scale(0.7); }
+}
+
+.topbar-right {
+  display:flex; align-items:center; gap:20px;
+}
+
+.user-badge {
+  display:flex; align-items:center; gap:8px;
+  padding: 5px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.user-badge .uname { color: var(--accent); }
+
+.logout-btn {
+  background:none; border:none; cursor:pointer;
+  color: var(--text-dim); font-family: var(--mono);
+  font-size: 11px; letter-spacing: 0.1em;
+  padding: 5px 10px;
+  transition: color 0.15s;
+}
+.logout-btn:hover { color: var(--accent3); }
+
+/* ── Nav tabs ── */
+.nav-strip {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display:flex; gap:0;
+  position:sticky; top:56px; z-index:99;
+}
+
+.nav-tab {
+  background:none; border:none; cursor:pointer;
+  font-family: var(--mono); font-size:11px;
+  letter-spacing: 0.12em; text-transform:uppercase;
+  color: var(--text-dim);
+  padding: 14px 20px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+  display:flex; align-items:center; gap:8px;
+}
+
+.nav-tab .nav-ico { font-size:13px; }
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Main layout ── */
+.shell {
+  display:grid;
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 97px);
+  position:relative; z-index:1;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: 20px 16px;
+  display:flex; flex-direction:column; gap:6px;
+  background: var(--bg2);
+}
+
+.sidebar-label {
+  font-size:9px; letter-spacing:0.2em;
+  color: var(--text-dim); text-transform:uppercase;
+  padding: 4px 8px;
+  margin-top:4px;
+}
+
+.profile-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 10px 12px;
+  cursor:pointer;
+  transition: all 0.15s;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+.profile-card:hover { border-color: var(--border2); background: var(--bg4); }
+.profile-card.is-mine { border-left: 2px solid var(--accent2); }
+
+.pc-left { display:flex; flex-direction:column; gap:3px; }
+.pc-name { color: var(--text-hi); font-size:12px; font-weight:500; }
+.pc-type { color: var(--accent); font-size:10px; letter-spacing:0.06em; }
+.pc-owner { color: var(--text-dim); font-size:9px; letter-spacing:0.04em; }
+
+.pc-del {
+  color: var(--text-dim); font-size:16px; line-height:1;
+  opacity:0; transition:0.15s; cursor:pointer; padding:2px 4px;
+  border-radius:2px;
+}
+.profile-card:hover .pc-del { opacity:1; }
+.pc-del:hover { color: var(--accent3); background: rgba(255,77,109,0.1); }
+
+.empty-state {
+  color: var(--text-dim); font-size:11px;
+  letter-spacing:0.06em; padding:12px 8px;
+  line-height:1.7;
+}
+
+/* ── Main content ── */
+.main { padding:28px 32px; max-width:960px; }
+
+.panel { display:none; }
+.panel.active { display:block; animation: fadeIn 0.2s ease; }
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Card system ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-family: var(--display);
+  font-size:13px; font-weight:600;
+  letter-spacing:0.15em; text-transform:uppercase;
+  color: var(--text-dim);
+  margin-bottom:16px;
+  display:flex; align-items:center; gap:8px;
+}
+
+.card-title::before {
+  content:'';
+  width:3px; height:14px;
+  background: var(--accent);
+  border-radius:2px;
+  box-shadow: 0 0 6px var(--accent);
+}
+
+/* ── Dashboard header ── */
+.panel-header {
+  margin-bottom:24px;
+}
+
+.panel-title {
+  font-family: var(--display);
+  font-size:26px; font-weight:700;
+  letter-spacing:0.08em;
+  color: var(--text-hi);
+  line-height:1;
+}
+
+.panel-sub {
+  color: var(--text-dim); font-size:11px;
+  letter-spacing:0.1em; margin-top:6px;
+}
+
+/* ── Form elements ── */
+.form-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+  margin-bottom:18px;
+}
+
+.fgroup { display:flex; flex-direction:column; gap:6px; }
+.fgroup.full { grid-column:1/-1; }
+
+.fgroup label {
+  font-size:9px; letter-spacing:0.2em;
+  text-transform:uppercase; color: var(--text-dim);
+}
+
+.fgroup input, .fgroup select {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text-hi);
+  padding: 10px 12px;
+  font-family: var(--mono); font-size:13px;
+  border-radius:2px; outline:none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.fgroup input:focus, .fgroup select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,229,255,0.06);
+}
+
+.fgroup select option { background: var(--bg3); }
+
+/* ── Sliders ── */
+.traits-grid {
+  display:grid; gap:10px; margin-bottom:18px;
+}
+
+.trait-row {
+  display:grid; grid-template-columns:130px 1fr 46px;
+  align-items:center; gap:10px;
+}
+
+.t-label { font-size:10px; color: var(--text-dim); letter-spacing:0.05em; }
+
+input[type=range] {
+  -webkit-appearance:none;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  height:4px; padding:0; cursor:pointer; border-radius:2px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  width:13px; height:13px;
+  background: var(--accent);
+  border-radius:50%; cursor:pointer;
+  box-shadow: 0 0 6px var(--accent);
+  transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
+
+.t-val { color: var(--accent); font-size:12px; text-align:right; font-weight:500; }
+
+/* ── Buttons ── */
+.btn {
+  background: var(--accent);
+  color: var(--bg); border:none;
+  padding:10px 22px;
+  font-family: var(--mono); font-size:11px; font-weight:600;
+  letter-spacing:0.15em; text-transform:uppercase;
+  cursor:pointer; border-radius:2px;
+  transition: all 0.15s;
+  box-shadow: 0 0 16px rgba(0,229,255,0.15);
+}
+
+.btn:hover { background:#33ecff; box-shadow: 0 0 24px rgba(0,229,255,0.3); }
+.btn:disabled { opacity:0.35; cursor:not-allowed; }
+
+.btn-ghost {
+  background:none; border:1px solid var(--border2);
+  color: var(--text); padding:9px 18px;
+  font-family: var(--mono); font-size:11px;
+  letter-spacing:0.12em; text-transform:uppercase;
+  cursor:pointer; border-radius:2px; transition:all 0.15s;
+}
+
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-row { display:flex; gap:10px; align-items:center; }
+
+/* ── Status ── */
+.msg-ok  { color: var(--green); font-size:11px; margin-top:8px; letter-spacing:0.06em; }
+.msg-err { color: var(--accent3); font-size:11px; margin-top:8px; letter-spacing:0.06em; }
+
+.loading {
+  color: var(--text-dim); font-size:11px; letter-spacing:0.1em;
+  padding:20px 0; animation: blink 1.2s ease infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+/* ── Compare ── */
+.select-row {
+  display:flex; gap:12px; align-items:flex-end; margin-bottom:20px;
+}
+.select-row .fgroup { flex:1; }
+
+.profile-pair {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;
+}
+
+.profile-mini {
+  background: var(--bg3); border:1px solid var(--border);
+  border-radius:3px; padding:16px;
+}
+
+.pm-name { font-family:var(--display); font-size:18px; font-weight:700; color:var(--text-hi); }
+.pm-type { color:var(--accent); font-size:11px; letter-spacing:0.08em; margin-top:2px; }
+.pm-desc { color:var(--text-dim); font-size:10px; margin-top:4px; }
+.pm-rarity { color:var(--accent3); font-size:9px; margin-top:4px; }
+
+.compat-hero {
+  display:flex; align-items:baseline; gap:8px; margin-bottom:20px;
+}
+
+.compat-num {
+  font-family: var(--display);
+  font-size:64px; font-weight:700; line-height:1;
+  text-shadow: 0 0 30px currentColor;
+}
+
+.compat-label { color:var(--text-dim); font-size:10px; letter-spacing:0.15em; }
+
+.bar-group { margin-bottom:20px; }
+
+.bar-row-label {
+  display:flex; justify-content:space-between;
+  font-size:9px; letter-spacing:0.06em; color:var(--text-dim);
+  margin-bottom:4px;
+}
+
+.bar-track {
+  height:3px; background:var(--bg4); border-radius:2px;
+  overflow:hidden; margin-bottom:8px;
+}
+
+.bar-fill {
+  height:100%; border-radius:2px;
+  transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+
+.analysis-block {
+  color: var(--text);
+  font-size:12px; line-height:1.9;
+  white-space:pre-wrap;
+  border-left:2px solid var(--accent);
+  padding-left:16px;
+}
+
+/* ── Group ── */
+.pairs-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+  gap:10px; margin-bottom:20px;
+}
+
+.pair-chip {
+  background: var(--bg3); border:1px solid var(--border);
+  padding:14px; border-radius:3px;
+  cursor:pointer; transition:all 0.15s;
+}
+
+.pair-chip:hover { border-color: var(--border2); transform:translateY(-2px); }
+.pair-names { font-size:11px; color:var(--text); margin-bottom:6px; }
+.pair-score { font-family:var(--display); font-size:28px; font-weight:700; }
+.pair-score span { font-size:12px; color:var(--text-dim); font-family:var(--mono); }
+
+/* ── Suggest ── */
+.chip-select {
+  display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;
+}
+
+.sel-chip {
+  padding:6px 12px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:2px; cursor:pointer;
+  font-family:var(--mono); font-size:11px; color:var(--text-dim);
+  transition:all 0.15s; user-select:none;
+}
+
+.sel-chip.on {
+  border-color:var(--accent2); color:var(--accent2);
+  background:rgba(124,77,255,0.08);
+}
+
+/* ── Chemistry Map ── */
+#chem-canvas-wrap {
+  width:100%; aspect-ratio:16/9;
+  background: var(--bg3);
+  border:1px solid var(--border);
+  border-radius:3px; position:relative;
+  overflow:hidden; margin-bottom:16px;
+  min-height: 320px;
+}
+
+#chem-canvas {
+  width:100%; height:100%; display:block;
+}
+
+.chem-legend {
+  display:flex; gap:20px; flex-wrap:wrap;
+  font-size:10px; color:var(--text-dim); letter-spacing:0.08em;
+}
+
+.legend-item { display:flex; align-items:center; gap:6px; }
+.legend-dot { width:8px; height:8px; border-radius:50%; }
+
+.chem-stats {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+  margin-bottom:16px;
+}
+
+.stat-box {
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:3px; padding:14px 16px;
+}
+
+.stat-num {
+  font-family:var(--display); font-size:32px; font-weight:700;
+  line-height:1; color:var(--text-hi);
+}
+
+.stat-label { color:var(--text-dim); font-size:9px; letter-spacing:0.15em; text-transform:uppercase; margin-top:4px; }
+
+/* ── Tags ── */
+.tag {
+  display:inline-block; padding:2px 7px;
+  font-size:9px; letter-spacing:0.1em; border-radius:2px; margin-right:4px;
+}
+.tag-c { background:rgba(0,229,255,0.08); color:var(--accent); border:1px solid rgba(0,229,255,0.2); }
+.tag-p { background:rgba(124,77,255,0.08); color:var(--accent2); border:1px solid rgba(124,77,255,0.2); }
+.tag-r { background:rgba(255,77,109,0.08); color:var(--accent3); border:1px solid rgba(255,77,109,0.2); }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>PSYCHE</h1>
-  <span>personality engine</span>
+<!-- Top bar -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    PSYCHE
+  </div>
+  <div class="topbar-right">
+    <div class="user-badge">logged in as <span class="uname">{{ current_user }}</span></div>
+    <a href="/logout"><button class="logout-btn">logout</button></a>
+  </div>
 </div>
 
-<div class="layout">
-  <div class="sidebar">
-    <button class="nav-btn active" onclick="showPanel('add')">+ Add Profile</button>
-    <button class="nav-btn" onclick="showPanel('compare')">Compare</button>
-    <button class="nav-btn" onclick="showPanel('group')">Group Analysis</button>
-    <button class="nav-btn" onclick="showPanel('suggest')">Suggest Roles</button>
+<!-- Nav tabs -->
+<div class="nav-strip">
+  <button class="nav-tab active" onclick="showPanel('add', this)">
+    <span class="nav-ico">＋</span> Add Profile
+  </button>
+  <button class="nav-tab" onclick="showPanel('compare', this)">
+    <span class="nav-ico">⇌</span> Compare
+  </button>
+  <button class="nav-tab" onclick="showPanel('group', this)">
+    <span class="nav-ico">◈</span> Group
+  </button>
+  <button class="nav-tab" onclick="showPanel('chemistry', this)">
+    <span class="nav-ico">◉</span> Chemistry Map
+  </button>
+  <button class="nav-tab" onclick="showPanel('suggest', this)">
+    <span class="nav-ico">⬡</span> Roles
+  </button>
+</div>
 
-    <div class="nav-divider"></div>
-    <div style="font-size:10px;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:4px;">PROFILES</div>
-    <div class="friend-list" id="friendList">
-      <div class="empty">no profiles yet</div>
-    </div>
+<div class="shell">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-label">Profiles</div>
+    <div id="friendList"><div class="empty-state">no profiles yet</div></div>
   </div>
 
+  <!-- Main -->
   <div class="main">
 
-    <!-- ADD PANEL -->
+    <!-- ── ADD ── -->
     <div class="panel active" id="panel-add">
-      <div class="panel-title">Add Profile</div>
-      <div class="panel-sub">enter personality data for a friend</div>
+      <div class="panel-header">
+        <div class="panel-title">Add Profile</div>
+        <div class="panel-sub">enter personality data</div>
+      </div>
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Name</label>
-          <input type="text" id="f-name" placeholder="Pritam">
-        </div>
-        <div class="form-group">
-          <label>MBTI Type</label>
-          <select id="f-mbti" onchange="updateTraitLabels()">
-            {% for t in mbti_types %}
-            <option value="{{ t }}">{{ t }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Variant</label>
-          <select id="f-variant" onchange="updateTraitLabels()">
-            <option value="A">Assertive (A)</option>
-            <option value="T">Turbulent (T)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Role / Notes (optional)</label>
-          <input type="text" id="f-notes" placeholder="close friend, batchmate...">
+      <div class="card">
+        <div class="card-title">Identity</div>
+        <div class="form-grid">
+          <div class="fgroup">
+            <label>Name</label>
+            <input type="text" id="f-name" placeholder="Zara">
+          </div>
+          <div class="fgroup">
+            <label>MBTI Type</label>
+            <select id="f-mbti" onchange="updateTraitLabels()">
+              {% for t in mbti_types %}
+              <option value="{{ t }}">{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="fgroup">
+            <label>Variant</label>
+            <select id="f-variant" onchange="updateTraitLabels()">
+              <option value="A">Assertive (A)</option>
+              <option value="T">Turbulent (T)</option>
+            </select>
+          </div>
+          <div class="fgroup">
+            <label>Notes (optional)</label>
+            <input type="text" id="f-notes" placeholder="close friend, batchmate...">
+          </div>
         </div>
       </div>
 
-      <div class="section-label">Trait Scores</div>
-      <div class="trait-group">
-        <div class="trait-row">
-          <span class="trait-label" id="label-introverted">Introverted %</span>
-          <input type="range" min="0" max="100" value="50" id="t-introverted" oninput="updateVal('introverted',this.value)">
-          <span class="trait-val" id="v-introverted">50</span>
+      <div class="card">
+        <div class="card-title">Trait Scores</div>
+        <div class="traits-grid">
+          <div class="trait-row">
+            <span class="t-label" id="lb-introverted">Introverted %</span>
+            <input type="range" min="0" max="100" value="50" id="t-introverted" oninput="tv('introverted',this.value)">
+            <span class="t-val" id="v-introverted">50</span>
+          </div>
+          <div class="trait-row">
+            <span class="t-label" id="lb-intuitive">Intuitive %</span>
+            <input type="range" min="0" max="100" value="50" id="t-intuitive" oninput="tv('intuitive',this.value)">
+            <span class="t-val" id="v-intuitive">50</span>
+          </div>
+          <div class="trait-row">
+            <span class="t-label" id="lb-thinking">Thinking %</span>
+            <input type="range" min="0" max="100" value="50" id="t-thinking" oninput="tv('thinking',this.value)">
+            <span class="t-val" id="v-thinking">50</span>
+          </div>
+          <div class="trait-row">
+            <span class="t-label" id="lb-judging">Judging %</span>
+            <input type="range" min="0" max="100" value="50" id="t-judging" oninput="tv('judging',this.value)">
+            <span class="t-val" id="v-judging">50</span>
+          </div>
+          <div class="trait-row">
+            <span class="t-label" id="lb-assertive">Assertive %</span>
+            <input type="range" min="0" max="100" value="50" id="t-assertive" oninput="tv('assertive',this.value)">
+            <span class="t-val" id="v-assertive">50</span>
+          </div>
         </div>
-        <div class="trait-row">
-          <span class="trait-label" id="label-intuitive">Intuitive %</span>
-          <input type="range" min="0" max="100" value="50" id="t-intuitive" oninput="updateVal('intuitive',this.value)">
-          <span class="trait-val" id="v-intuitive">50</span>
-        </div>
-        <div class="trait-row">
-          <span class="trait-label" id="label-thinking">Thinking %</span>
-          <input type="range" min="0" max="100" value="50" id="t-thinking" oninput="updateVal('thinking',this.value)">
-          <span class="trait-val" id="v-thinking">50</span>
-        </div>
-        <div class="trait-row">
-          <span class="trait-label" id="label-judging">Judging %</span>
-          <input type="range" min="0" max="100" value="50" id="t-judging" oninput="updateVal('judging',this.value)">
-          <span class="trait-val" id="v-judging">50</span>
-        </div>
-        <div class="trait-row">
-          <span class="trait-label" id="label-assertive">Assertive %</span>
-          <input type="range" min="0" max="100" value="50" id="t-assertive" oninput="updateVal('assertive',this.value)">
-          <span class="trait-val" id="v-assertive">50</span>
+        <div class="btn-row">
+          <button class="btn" onclick="addFriend()">Save Profile</button>
+          <div id="add-msg"></div>
         </div>
       </div>
-
-      <button class="btn" onclick="addFriend()">Save Profile</button>
-      <div id="add-msg"></div>
     </div>
 
-    <!-- COMPARE PANEL -->
+    <!-- ── COMPARE ── -->
     <div class="panel" id="panel-compare">
-      <div class="panel-title">Compare</div>
-      <div class="panel-sub">head-to-head personality analysis</div>
+      <div class="panel-header">
+        <div class="panel-title">Compare</div>
+        <div class="panel-sub">head-to-head compatibility analysis</div>
+      </div>
 
-      <div class="select-row">
-        <div class="form-group">
-          <label>Person A</label>
-          <select id="cmp-a"></select>
+      <div class="card">
+        <div class="select-row">
+          <div class="fgroup">
+            <label>Person A</label>
+            <select id="cmp-a"></select>
+          </div>
+          <div class="fgroup">
+            <label>Person B</label>
+            <select id="cmp-b"></select>
+          </div>
+          <button class="btn" onclick="doCompare()">Analyze</button>
         </div>
-        <div class="form-group">
-          <label>Person B</label>
-          <select id="cmp-b"></select>
-        </div>
-        <button class="btn" onclick="doCompare()">Analyze</button>
       </div>
 
       <div id="compare-result"></div>
     </div>
 
-    <!-- GROUP PANEL -->
+    <!-- ── GROUP ── -->
     <div class="panel" id="panel-group">
-      <div class="panel-title">Group Analysis</div>
-      <div class="panel-sub">how everyone fits together</div>
-      <button class="btn" onclick="doGroup()">Run Analysis</button>
-      <div style="margin-top:24px;" id="group-result"></div>
+      <div class="panel-header">
+        <div class="panel-title">Group Analysis</div>
+        <div class="panel-sub">how everyone fits together</div>
+      </div>
+      <div class="card">
+        <button class="btn" onclick="doGroup()">Run Analysis</button>
+      </div>
+      <div id="group-result"></div>
     </div>
 
-    <!-- SUGGEST PANEL -->
-    <div class="panel" id="panel-suggest">
-      <div class="panel-title">Suggest Roles</div>
-      <div class="panel-sub">select people and a context</div>
-
-      <div class="section-label">Select People</div>
-      <div class="suggest-select" id="suggest-chips"></div>
-
-      <div class="form-group" style="margin-bottom:16px;">
-        <label>Context</label>
-        <input type="text" id="suggest-ctx" placeholder="building a startup, working on a project, studying together...">
+    <!-- ── CHEMISTRY MAP ── -->
+    <div class="panel" id="panel-chemistry">
+      <div class="panel-header">
+        <div class="panel-title">Chemistry Map</div>
+        <div class="panel-sub">force-directed compatibility web — click a pair to compare</div>
       </div>
 
-      <button class="btn" onclick="doSuggest()">Get Suggestions</button>
-      <div style="margin-top:24px;" id="suggest-result"></div>
+      <div class="chem-stats" id="chem-stats" style="display:none"></div>
+
+      <div id="chem-canvas-wrap">
+        <canvas id="chem-canvas"></canvas>
+      </div>
+
+      <div class="chem-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#00e676"></div> High compat (75+)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ffd740"></div> Mid compat (50–74)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ff4d6d"></div> Low compat (&lt;50)</div>
+      </div>
     </div>
 
-  </div>
-</div>
+    <!-- ── SUGGEST ── -->
+    <div class="panel" id="panel-suggest">
+      <div class="panel-header">
+        <div class="panel-title">Role Suggestions</div>
+        <div class="panel-sub">select people and a context</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Select People</div>
+        <div class="chip-select" id="suggest-chips"></div>
+        <div class="fgroup" style="margin-bottom:16px">
+          <label>Context</label>
+          <input type="text" id="suggest-ctx" placeholder="building a startup, hackathon, study group...">
+        </div>
+        <button class="btn" onclick="doSuggest()">Get Suggestions</button>
+      </div>
+
+      <div id="suggest-result"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
 
 <script>
-  function updateTraitLabels() {
-  const mbti = document.getElementById('f-mbti').value;
-  document.getElementById('label-introverted').textContent = mbti[0] === 'I' ? 'Introverted %' : 'Extroverted %';
-  document.getElementById('label-intuitive').textContent   = mbti[1] === 'N' ? 'Intuitive %'   : 'Sensing %';
-  document.getElementById('label-thinking').textContent    = mbti[2] === 'T' ? 'Thinking %'    : 'Feeling %';
-  document.getElementById('label-judging').textContent     = mbti[3] === 'J' ? 'Judging %'     : 'Perceiving %';
-  const variant = document.getElementById('f-variant').value;
-  document.getElementById('label-assertive').textContent   = variant === 'A' ? 'Assertive %'   : 'Turbulent %';
-}
+// ── Globals ──────────────────────────────────────────────────────────────────
+const CURRENT_USER = "{{ current_user }}";
+let friends = [];
+
 const MBTI_DESC = {
   INTJ:"Architect",INTP:"Logician",ENTJ:"Commander",ENTP:"Debater",
   INFJ:"Advocate",INFP:"Mediator",ENFJ:"Protagonist",ENFP:"Campaigner",
@@ -583,27 +696,39 @@ const RARITY = {
   ISTJ:12,ISFJ:13,ESTJ:9,ESFJ:12,ISTP:5,ISFP:6,ESTP:5,ESFP:7
 };
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
 function scoreColor(s) {
-  if (s >= 75) return '#5adb8a';
-  if (s >= 50) return '#e8c547';
-  return '#e05a5a';
+  if (s >= 75) return '#00e676';
+  if (s >= 50) return '#ffd740';
+  return '#ff4d6d';
 }
 
-function updateVal(trait, val) {
+function tv(trait, val) {
   document.getElementById('v-' + trait).textContent = val;
 }
 
-function showPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
-  event.target.classList.add('active');
-  if (id === 'compare') populateSelects();
-  if (id === 'suggest') populateSuggestChips();
+function updateTraitLabels() {
+  const m = document.getElementById('f-mbti').value;
+  const v = document.getElementById('f-variant').value;
+  document.getElementById('lb-introverted').textContent = m[0]==='I' ? 'Introverted %' : 'Extroverted %';
+  document.getElementById('lb-intuitive').textContent   = m[1]==='N' ? 'Intuitive %'   : 'Sensing %';
+  document.getElementById('lb-thinking').textContent    = m[2]==='T' ? 'Thinking %'    : 'Feeling %';
+  document.getElementById('lb-judging').textContent     = m[3]==='J' ? 'Judging %'     : 'Perceiving %';
+  document.getElementById('lb-assertive').textContent   = v==='A'    ? 'Assertive %'   : 'Turbulent %';
 }
 
-let friends = [];
+// ── Panel nav ────────────────────────────────────────────────────────────────
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'compare')   populateSelects();
+  if (id === 'suggest')   populateSuggestChips();
+  if (id === 'chemistry') loadChemistry();
+}
 
+// ── Friend list ───────────────────────────────────────────────────────────────
 async function loadFriends() {
   const res = await fetch('/api/friends');
   friends = await res.json();
@@ -612,26 +737,38 @@ async function loadFriends() {
 
 function renderFriendList() {
   const el = document.getElementById('friendList');
-  if (!friends.length) { el.innerHTML = '<div class="empty">no profiles yet</div>'; return; }
-  el.innerHTML = friends.map(f => `
-    <div class="friend-chip">
-      <div>
-        <div class="name">${f.name}</div>
-        <div class="type">${f.mbti}-${f.variant || '?'}</div>
+  if (!friends.length) {
+    el.innerHTML = '<div class="empty-state">no profiles yet —<br>add someone above</div>';
+    return;
+  }
+  el.innerHTML = friends.map(f => {
+    const mine = f.owner === CURRENT_USER;
+    return `
+      <div class="profile-card ${mine ? 'is-mine' : ''}">
+        <div class="pc-left">
+          <div class="pc-name">${f.name}</div>
+          <div class="pc-type">${f.mbti}-${f.variant || '?'} · ${MBTI_DESC[f.mbti] || ''}</div>
+          <div class="pc-owner">by ${f.owner || 'unknown'}</div>
+        </div>
+        ${mine ? `<span class="pc-del" onclick="deleteFriend('${f.name}')">×</span>` : ''}
       </div>
-      <span class="del" onclick="deleteFriend('${f.name}')">×</span>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 async function deleteFriend(name) {
-  await fetch('/api/friends/' + name, { method: 'DELETE' });
+  const res = await fetch('/api/friends/' + encodeURIComponent(name), { method: 'DELETE' });
+  const data = await res.json();
+  if (data.status !== 'ok') {
+    alert(data.message || 'Cannot delete');
+    return;
+  }
   await loadFriends();
 }
 
 async function addFriend() {
   const name = document.getElementById('f-name').value.trim();
-  if (!name) { document.getElementById('add-msg').innerHTML = '<div class="error">name required</div>'; return; }
+  if (!name) { document.getElementById('add-msg').innerHTML = '<span class="msg-err">name required</span>'; return; }
 
   const friend = {
     name,
@@ -640,24 +777,30 @@ async function addFriend() {
     notes: document.getElementById('f-notes').value,
     traits: {
       introverted: +document.getElementById('t-introverted').value,
-      intuitive: +document.getElementById('t-intuitive').value,
-      thinking: +document.getElementById('t-thinking').value,
-      judging: +document.getElementById('t-judging').value,
-      assertive: +document.getElementById('t-assertive').value,
+      intuitive:   +document.getElementById('t-intuitive').value,
+      thinking:    +document.getElementById('t-thinking').value,
+      judging:     +document.getElementById('t-judging').value,
+      assertive:   +document.getElementById('t-assertive').value,
     }
   };
 
-  await fetch('/api/friends', {
+  const res = await fetch('/api/friends', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(friend)
   });
 
-  document.getElementById('add-msg').innerHTML = '<div class="success">saved — ' + name + '</div>';
-  document.getElementById('f-name').value = '';
+  const data = await res.json();
+  if (data.status === 'ok') {
+    document.getElementById('add-msg').innerHTML = `<span class="msg-ok">✓ saved — ${name}</span>`;
+    document.getElementById('f-name').value = '';
+  } else {
+    document.getElementById('add-msg').innerHTML = `<span class="msg-err">${data.message}</span>`;
+  }
   await loadFriends();
 }
 
+// ── Compare ───────────────────────────────────────────────────────────────────
 function populateSelects() {
   ['cmp-a','cmp-b'].forEach(id => {
     const sel = document.getElementById(id);
@@ -665,141 +808,387 @@ function populateSelects() {
   });
 }
 
-function populateSuggestChips() {
-  const el = document.getElementById('suggest-chips');
-  el.innerHTML = friends.map(f => `
-    <div class="suggest-chip" onclick="toggleChip(this,'${f.name}')" data-name="${f.name}">
-      ${f.name} · ${f.mbti}
-    </div>
-  `).join('');
-}
-
-function toggleChip(el, name) {
-  el.classList.toggle('selected');
-}
-
 async function doCompare() {
   const a = document.getElementById('cmp-a').value;
   const b = document.getElementById('cmp-b').value;
-  if (a === b) { document.getElementById('compare-result').innerHTML = '<div class="error">select two different people</div>'; return; }
+  if (a === b) { document.getElementById('compare-result').innerHTML = '<div class="msg-err">select two different people</div>'; return; }
 
-  document.getElementById('compare-result').innerHTML = '<div class="loading">// analyzing...</div>';
+  document.getElementById('compare-result').innerHTML = '<div class="loading">// running analysis...</div>';
 
   const res = await fetch('/api/compare', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ a, b })
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({a, b})
   });
-  const data = await res.json();
-
-  const sc = data.compatibility.overall;
+  const d = await res.json();
+  const sc = d.compatibility.overall;
   const col = scoreColor(sc);
-
   const traits = ['introverted','intuitive','thinking','judging','assertive'];
 
   document.getElementById('compare-result').innerHTML = `
     <div class="card">
-      <div class="profiles-grid">
+      <div class="profile-pair">
         <div class="profile-mini">
-          <div class="pname">${data.a.name}</div>
-          <div class="ptype">${data.a.mbti}-${data.a.variant || '?'} · ${MBTI_DESC[data.a.mbti] || ''}</div>
-          <div class="prarity">~${RARITY[data.a.mbti] || '?'}% of population</div>
+          <div class="pm-name">${d.a.name}</div>
+          <div class="pm-type">${d.a.mbti}-${d.a.variant||'?'} · ${MBTI_DESC[d.a.mbti]||''}</div>
+          <div class="pm-desc">${d.a.notes || ''}</div>
+          <div class="pm-rarity">~${RARITY[d.a.mbti]||'?'}% of population</div>
         </div>
         <div class="profile-mini">
-          <div class="pname">${data.b.name}</div>
-          <div class="ptype">${data.b.mbti}-${data.b.variant || '?'} · ${MBTI_DESC[data.b.mbti] || ''}</div>
-          <div class="prarity">~${RARITY[data.b.mbti] || '?'}% of population</div>
+          <div class="pm-name">${d.b.name}</div>
+          <div class="pm-type">${d.b.mbti}-${d.b.variant||'?'} · ${MBTI_DESC[d.b.mbti]||''}</div>
+          <div class="pm-desc">${d.b.notes || ''}</div>
+          <div class="pm-rarity">~${RARITY[d.b.mbti]||'?'}% of population</div>
         </div>
       </div>
-
-      <div class="compat-score">
+      <div class="compat-hero">
         <div class="compat-num" style="color:${col}">${sc}</div>
         <div class="compat-label">% COMPATIBILITY</div>
       </div>
-
-      <div class="compat-bar-wrap">
+      <div class="bar-group">
         ${traits.map(t => `
-          <div class="compat-bar-label">
+          <div class="bar-row-label">
             <span>${t}</span>
-            <span>${data.compatibility.by_trait[t]}%</span>
+            <span>${d.compatibility.by_trait[t]}%</span>
           </div>
-          <div class="compat-bar">
-            <div class="compat-bar-fill" style="width:${data.compatibility.by_trait[t]}%;background:${scoreColor(data.compatibility.by_trait[t])}"></div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:0%;background:${scoreColor(d.compatibility.by_trait[t])}"
+              data-w="${d.compatibility.by_trait[t]}"></div>
           </div>
         `).join('')}
       </div>
-
-      <div class="section-label">AI Analysis</div>
-      <div class="analysis-text">${data.analysis}</div>
+      <div class="card-title">AI Analysis</div>
+      <div class="analysis-block">${d.analysis}</div>
     </div>
   `;
-}
-
-async function doGroup() {
-  if (friends.length < 2) {
-    document.getElementById('group-result').innerHTML = '<div class="error">need at least 2 profiles</div>';
-    return;
-  }
-
-  document.getElementById('group-result').innerHTML = '<div class="loading">// analyzing group dynamics...</div>';
-
-  const res = await fetch('/api/group');
-  const data = await res.json();
-
-  document.getElementById('group-result').innerHTML = `
-    <div class="section-label">Pairwise Compatibility</div>
-    <div class="pair-grid">
-      ${data.pairs.map(p => `
-        <div class="pair-card" onclick="quickCompare('${p.a}','${p.b}')">
-          <div class="pair-names">${p.a} × ${p.b}</div>
-          <div class="pair-score" style="color:${scoreColor(p.score)}">${p.score}<span style="font-size:14px;color:var(--text-dim)">%</span></div>
-        </div>
-      `).join('')}
-    </div>
-    <div class="card">
-      <div class="section-label">Group Dynamic</div>
-      <div class="analysis-text">${data.analysis}</div>
-    </div>
-  `;
+  // animate bars
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar-fill').forEach(b => {
+      b.style.width = b.dataset.w + '%';
+    });
+  });
 }
 
 function quickCompare(a, b) {
-  showPanel('compare');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.nav-btn')[1].classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((btn,i) => {
+    btn.classList.toggle('active', i===1);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-compare').classList.add('active');
   populateSelects();
   document.getElementById('cmp-a').value = a;
   document.getElementById('cmp-b').value = b;
   doCompare();
 }
 
-async function doSuggest() {
-  const selected = [...document.querySelectorAll('.suggest-chip.selected')].map(c => c.dataset.name);
-  const ctx = document.getElementById('suggest-ctx').value || 'working together';
-
-  if (!selected.length) {
-    document.getElementById('suggest-result').innerHTML = '<div class="error">select at least one person</div>';
+// ── Group ─────────────────────────────────────────────────────────────────────
+async function doGroup() {
+  if (friends.length < 2) {
+    document.getElementById('group-result').innerHTML = '<div class="msg-err">need at least 2 profiles</div>';
     return;
   }
+  document.getElementById('group-result').innerHTML = '<div class="loading">// analyzing group dynamics...</div>';
+  const res = await fetch('/api/group');
+  const d = await res.json();
 
-  document.getElementById('suggest-result').innerHTML = '<div class="loading">// thinking...</div>';
-
-  const res = await fetch('/api/suggest', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ names: selected, context: ctx })
-  });
-  const data = await res.json();
-
-  document.getElementById('suggest-result').innerHTML = `
+  document.getElementById('group-result').innerHTML = `
     <div class="card">
-      <div class="section-label">Role Suggestions — ${ctx}</div>
-      <div class="analysis-text">${data.analysis}</div>
+      <div class="card-title">Pairwise Compatibility</div>
+      <div class="pairs-grid">
+        ${d.pairs.map(p => `
+          <div class="pair-chip" onclick="quickCompare('${p.a}','${p.b}')">
+            <div class="pair-names">${p.a} × ${p.b}</div>
+            <div class="pair-score" style="color:${scoreColor(p.score)}">${p.score}<span>%</span></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Group Dynamic</div>
+      <div class="analysis-block">${d.analysis}</div>
     </div>
   `;
 }
 
+// ── Chemistry Map ─────────────────────────────────────────────────────────────
+let chemNodes = [], chemEdges = [], animFrame = null;
+let hoveredEdge = null, hoveredNode = null;
 
+async function loadChemistry() {
+  const wrap = document.getElementById('chem-canvas-wrap');
+  const canvas = document.getElementById('chem-canvas');
+  const statsEl = document.getElementById('chem-stats');
+
+  canvas.innerHTML = '';
+  statsEl.style.display = 'none';
+
+  if (friends.length < 2) {
+    wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:11px;letter-spacing:0.1em;">need at least 2 profiles</div>';
+    return;
+  }
+
+  wrap.innerHTML = '<canvas id="chem-canvas"></canvas>';
+
+  const res = await fetch('/api/chemistry');
+  const data = await res.json();
+  if (data.error) return;
+
+  const nodes = data.nodes;
+  const edges = data.edges;
+
+  // Stats
+  const avg = Math.round(edges.reduce((s,e)=>s+e.score,0)/edges.length);
+  const best = edges.reduce((b,e)=>e.score>b.score?e:b, edges[0]);
+  statsEl.style.display = 'grid';
+  statsEl.innerHTML = `
+    <div class="stat-box">
+      <div class="stat-num">${nodes.length}</div>
+      <div class="stat-label">Profiles</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" style="color:${scoreColor(avg)}">${avg}%</div>
+      <div class="stat-label">Avg Compat</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" style="color:var(--green)">${best.a} × ${best.b}</div>
+      <div class="stat-label">Best Pair · ${best.score}%</div>
+    </div>
+  `;
+
+  const cvs = document.getElementById('chem-canvas');
+  const ctx = cvs.getContext('2d');
+
+  function resize() {
+    cvs.width = cvs.offsetWidth;
+    cvs.height = cvs.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', () => { resize(); });
+
+  // Init positions in a circle
+  const N = nodes.length;
+  nodes.forEach((n, i) => {
+    const angle = (2 * Math.PI * i / N) - Math.PI/2;
+    const r = Math.min(cvs.width, cvs.height) * 0.33;
+    n.x = cvs.width/2 + r * Math.cos(angle);
+    n.y = cvs.height/2 + r * Math.sin(angle);
+    n.vx = 0; n.vy = 0;
+    n.r = 22;
+  });
+
+  // Force simulation
+  function simulate() {
+    const W = cvs.width, H = cvs.height;
+    const REPEL = 2400, DAMPING = 0.82, CENTER = 0.012;
+
+    nodes.forEach(a => {
+      // Center gravity
+      a.vx += (W/2 - a.x) * CENTER;
+      a.vy += (H/2 - a.y) * CENTER;
+
+      // Node repulsion
+      nodes.forEach(b => {
+        if (a === b) return;
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+        const force = REPEL / (dist*dist);
+        a.vx += dx/dist * force * 0.5;
+        a.vy += dy/dist * force * 0.5;
+      });
+    });
+
+    // Edge springs — high compat = pull together, low = push apart
+    edges.forEach(e => {
+      const na = nodes.find(n=>n.id===e.a);
+      const nb = nodes.find(n=>n.id===e.b);
+      if (!na || !nb) return;
+      const dx = nb.x - na.x, dy = nb.y - na.y;
+      const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+      // ideal distance: high compat = close, low = far
+      const ideal = 60 + (100 - e.score) * 2.2;
+      const stretch = (dist - ideal) * 0.04;
+      const fx = dx/dist * stretch, fy = dy/dist * stretch;
+      na.vx += fx; na.vy += fy;
+      nb.vx -= fx; nb.vy -= fy;
+    });
+
+    nodes.forEach(n => {
+      n.vx *= DAMPING; n.vy *= DAMPING;
+      n.x += n.vx; n.y += n.vy;
+      // Boundary
+      n.x = Math.max(n.r+8, Math.min(W-n.r-8, n.x));
+      n.y = Math.max(n.r+8, Math.min(H-n.r-8, n.y));
+    });
+  }
+
+  function edgeColor(score) {
+    if (score >= 75) return 'rgba(0,230,118,';
+    if (score >= 50) return 'rgba(255,215,64,';
+    return 'rgba(255,77,109,';
+  }
+
+  function draw() {
+    const W = cvs.width, H = cvs.height;
+    ctx.clearRect(0,0,W,H);
+
+    // Draw edges
+    edges.forEach(e => {
+      const na = nodes.find(n=>n.id===e.a);
+      const nb = nodes.find(n=>n.id===e.b);
+      if (!na || !nb) return;
+      const isHov = hoveredEdge === e || hoveredNode === na || hoveredNode === nb;
+      const alpha = isHov ? 0.9 : 0.3;
+      const width = isHov ? 2.5 : (e.score/100) * 2 + 0.5;
+
+      ctx.beginPath();
+      ctx.moveTo(na.x, na.y);
+      ctx.lineTo(nb.x, nb.y);
+      ctx.strokeStyle = edgeColor(e.score) + alpha + ')';
+      ctx.lineWidth = width;
+      ctx.stroke();
+
+      // Score label on hover
+      if (isHov) {
+        const mx = (na.x+nb.x)/2, my = (na.y+nb.y)/2;
+        ctx.fillStyle = edgeColor(e.score) + '1)';
+        ctx.font = '500 11px IBM Plex Mono';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // pill background
+        const txt = e.score + '%';
+        const tw = ctx.measureText(txt).width;
+        ctx.fillStyle = 'rgba(6,8,16,0.85)';
+        ctx.fillRect(mx-tw/2-6, my-9, tw+12, 18);
+        ctx.fillStyle = edgeColor(e.score) + '1)';
+        ctx.fillText(txt, mx, my);
+      }
+    });
+
+    // Draw nodes
+    nodes.forEach(n => {
+      const isHov = hoveredNode === n;
+      const r = isHov ? n.r + 4 : n.r;
+
+      // Glow
+      const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r*2.5);
+      grd.addColorStop(0, 'rgba(0,229,255,0.15)');
+      grd.addColorStop(1, 'rgba(0,229,255,0)');
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r*2.5, 0, Math.PI*2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      // Circle
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI*2);
+      ctx.fillStyle = isHov ? 'rgba(0,229,255,0.18)' : 'rgba(17,21,32,0.9)';
+      ctx.fill();
+      ctx.strokeStyle = isHov ? 'rgba(0,229,255,0.9)' : 'rgba(0,229,255,0.35)';
+      ctx.lineWidth = isHov ? 2 : 1.5;
+      ctx.stroke();
+
+      // Name
+      ctx.fillStyle = isHov ? '#e8edf8' : '#b0bcd4';
+      ctx.font = (isHov ? '600' : '500') + ' 12px IBM Plex Mono';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(n.id, n.x, n.y - 3);
+
+      // MBTI
+      ctx.fillStyle = 'rgba(0,229,255,0.7)';
+      ctx.font = '300 9px IBM Plex Mono';
+      ctx.fillText(n.mbti, n.x, n.y + 9);
+    });
+  }
+
+  let tick = 0;
+  function loop() {
+    if (tick < 180) { simulate(); tick++; }
+    else if (hoveredNode || hoveredEdge) { simulate(); }
+    draw();
+    animFrame = requestAnimationFrame(loop);
+  }
+
+  if (animFrame) cancelAnimationFrame(animFrame);
+  loop();
+
+  // Hover detection
+  cvs.onmousemove = (e) => {
+    const rect = cvs.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (cvs.width / rect.width);
+    const my = (e.clientY - rect.top) * (cvs.height / rect.height);
+
+    hoveredNode = null;
+    hoveredEdge = null;
+
+    for (const n of nodes) {
+      const dx = mx - n.x, dy = my - n.y;
+      if (Math.sqrt(dx*dx+dy*dy) < n.r + 6) { hoveredNode = n; break; }
+    }
+
+    if (!hoveredNode) {
+      for (const edge of edges) {
+        const na = nodes.find(n=>n.id===edge.a);
+        const nb = nodes.find(n=>n.id===edge.b);
+        if (!na || !nb) continue;
+        // point-to-segment distance
+        const dx = nb.x-na.x, dy = nb.y-na.y;
+        const len2 = dx*dx+dy*dy;
+        const t = Math.max(0,Math.min(1,((mx-na.x)*dx+(my-na.y)*dy)/len2));
+        const px = na.x+t*dx, py = na.y+t*dy;
+        const dist = Math.sqrt((mx-px)**2+(my-py)**2);
+        if (dist < 10) { hoveredEdge = edge; break; }
+      }
+    }
+
+    cvs.style.cursor = (hoveredNode || hoveredEdge) ? 'pointer' : 'default';
+  };
+
+  cvs.onmouseleave = () => { hoveredNode = null; hoveredEdge = null; };
+
+  cvs.onclick = (e) => {
+    if (hoveredEdge) quickCompare(hoveredEdge.a, hoveredEdge.b);
+    if (hoveredNode) {
+      // find best partner for this node
+      const nodeEdges = edges.filter(ed=>ed.a===hoveredNode.id||ed.b===hoveredNode.id);
+      if (nodeEdges.length) {
+        const best = nodeEdges.reduce((b,x)=>x.score>b.score?x:b);
+        const partner = best.a===hoveredNode.id ? best.b : best.a;
+        quickCompare(hoveredNode.id, partner);
+      }
+    }
+  };
+}
+
+// ── Suggest ───────────────────────────────────────────────────────────────────
+function populateSuggestChips() {
+  document.getElementById('suggest-chips').innerHTML = friends.map(f => `
+    <div class="sel-chip" onclick="this.classList.toggle('on')" data-name="${f.name}">
+      ${f.name} · ${f.mbti}
+    </div>
+  `).join('');
+}
+
+async function doSuggest() {
+  const selected = [...document.querySelectorAll('.sel-chip.on')].map(c=>c.dataset.name);
+  const ctx = document.getElementById('suggest-ctx').value || 'working together';
+  if (!selected.length) { document.getElementById('suggest-result').innerHTML = '<div class="msg-err">select at least one person</div>'; return; }
+
+  document.getElementById('suggest-result').innerHTML = '<div class="loading">// thinking...</div>';
+
+  const res = await fetch('/api/suggest', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({names:selected,context:ctx})
+  });
+  const d = await res.json();
+  document.getElementById('suggest-result').innerHTML = `
+    <div class="card">
+      <div class="card-title">Role Suggestions — ${ctx}</div>
+      <div class="analysis-block">${d.analysis}</div>
+    </div>
+  `;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 updateTraitLabels();
 loadFriends();
 </script>
