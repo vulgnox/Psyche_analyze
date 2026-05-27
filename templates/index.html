@@ -696,6 +696,13 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
         <div id="chem-tooltip"></div>
         <div id="chem-hint">DRAG · SCROLL · CLICK</div>
         <div id="chem-controls">
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(6,8,16,0.8);border:1px solid var(--border2);border-radius:2px;padding:4px 10px;">
+            <span style="font-size:9px;color:var(--text-dim);letter-spacing:0.1em;">SENS</span>
+            <input type="range" min="1" max="5" step="0.5" value="2.5" id="chem-sens"
+              style="width:60px;height:3px;padding:0;border:none;background:var(--border2);cursor:pointer;"
+              oninput="document.getElementById('chem-sens-val').textContent=this.value">
+            <span id="chem-sens-val" style="font-size:9px;color:var(--accent);min-width:14px;text-align:right;">2.5</span>
+          </div>
           <button class="chem-ctrl-btn" onclick="chemZoom(1.2)" title="Zoom in">+</button>
           <button class="chem-ctrl-btn" onclick="chemZoom(0.8)" title="Zoom out">−</button>
           <button class="chem-ctrl-btn" onclick="chemReset()" title="Reset view">⟳</button>
@@ -1180,10 +1187,12 @@ async function loadChemistry() {
 
   window.addEventListener('mousemove', ev => {
     if (isDragging) {
+      const sens = parseFloat(document.getElementById('chem-sens')?.value || 2.5);
+      const factor = (sens / 2.5) * 0.022;
       const dx = ev.clientX - lastX;
       const dy = ev.clientY - lastY;
-      velY += dx * 0.008;
-      velX += dy * 0.008;
+      velY += dx * factor;
+      velX += dy * factor;
       lastX = ev.clientX; lastY = ev.clientY;
     }
     // Mouse position for raycasting
