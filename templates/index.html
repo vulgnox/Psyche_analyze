@@ -438,16 +438,38 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 
 /* ── Chemistry Map ── */
 #chem-canvas-wrap {
-  width:100%; aspect-ratio:16/9;
+  width:100%;
+  height: 420px;
   background: var(--bg3);
   border:1px solid var(--border);
   border-radius:3px; position:relative;
   overflow:hidden; margin-bottom:16px;
-  min-height: 320px;
 }
 
 #chem-canvas {
   width:100%; height:100%; display:block;
+}
+
+#chem-tooltip {
+  position:absolute;
+  pointer-events:none;
+  background: rgba(6,8,16,0.92);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-hi);
+  letter-spacing: 0.06em;
+  display: none;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+#chem-hint {
+  position:absolute;
+  bottom:10px; right:14px;
+  font-size:9px; color:var(--text-dim);
+  letter-spacing:0.1em; pointer-events:none;
 }
 
 .chem-legend {
@@ -647,6 +669,8 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 
       <div id="chem-canvas-wrap">
         <canvas id="chem-canvas"></canvas>
+        <div id="chem-tooltip"></div>
+        <div id="chem-hint">CLICK EDGE OR NODE TO COMPARE</div>
       </div>
 
       <div class="chem-legend">
@@ -725,7 +749,7 @@ function showPanel(id, btn) {
   if (btn) btn.classList.add('active');
   if (id === 'compare')   populateSelects();
   if (id === 'suggest')   populateSuggestChips();
-  if (id === 'chemistry') loadChemistry();
+  if (id === 'chemistry') requestAnimationFrame(() => requestAnimationFrame(loadChemistry));
 }
 
 // ── Friend list ───────────────────────────────────────────────────────────────
@@ -915,18 +939,22 @@ let hoveredEdge = null, hoveredNode = null;
 
 async function loadChemistry() {
   const wrap = document.getElementById('chem-canvas-wrap');
-  const canvas = document.getElementById('chem-canvas');
   const statsEl = document.getElementById('chem-stats');
+  const tooltip = document.getElementById('chem-tooltip');
 
-  canvas.innerHTML = '';
   statsEl.style.display = 'none';
 
   if (friends.length < 2) {
-    wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:11px;letter-spacing:0.1em;">need at least 2 profiles</div>';
+    wrap.style.display = 'flex';
+    wrap.style.alignItems = 'center';
+    wrap.style.justifyContent = 'center';
+    document.getElementById('chem-canvas').style.display = 'none';
+    tooltip.style.display = 'none';
+    const hint = document.getElementById('chem-hint');
+    if (hint) hint.style.display = 'none';
+    wrap.insertAdjacentHTML('beforeend', '<div style="color:var(--text-dim);font-size:11px;letter-spacing:0.1em;position:absolute;">need at least 2 profiles</div>');
     return;
   }
-
-  wrap.innerHTML = '<canvas id="chem-canvas"></canvas>';
 
   const res = await fetch('/api/chemistry');
   const data = await res.json();
@@ -935,9 +963,10 @@ async function loadChemistry() {
   const nodes = data.nodes;
   const edges = data.edges;
 
-  // Stats
+  // Stats bar
   const avg = Math.round(edges.reduce((s,e)=>s+e.score,0)/edges.length);
   const best = edges.reduce((b,e)=>e.score>b.score?e:b, edges[0]);
+  const worst = edges.reduce((b,e)=>e.score<b.score?e:b, edges[0]);
   statsEl.style.display = 'grid';
   statsEl.innerHTML = `
     <div class="stat-box">
@@ -946,49 +975,65 @@ async function loadChemistry() {
     </div>
     <div class="stat-box">
       <div class="stat-num" style="color:${scoreColor(avg)}">${avg}%</div>
-      <div class="stat-label">Avg Compat</div>
+      <div class="stat-label">Group Avg</div>
     </div>
     <div class="stat-box">
-      <div class="stat-num" style="color:var(--green)">${best.a} × ${best.b}</div>
-      <div class="stat-label">Best Pair · ${best.score}%</div>
+      <div class="stat-num" style="color:var(--green);font-size:18px">${best.a} × ${best.b}</div>
+      <div class="stat-label">Best Match · ${best.score}%</div>
     </div>
   `;
 
+  // ── Canvas setup — wait for real dimensions ──
   const cvs = document.getElementById('chem-canvas');
   const ctx = cvs.getContext('2d');
 
-  function resize() {
-    cvs.width = cvs.offsetWidth;
-    cvs.height = cvs.offsetHeight;
+  // Panel is now visible (showPanel ran first), but use getBoundingClientRect for true px
+  function setSize() {
+    const rect = wrap.getBoundingClientRect();
+    cvs.width  = rect.width  || wrap.offsetWidth  || 800;
+    cvs.height = rect.height || wrap.offsetHeight || 420;
   }
-  resize();
-  window.addEventListener('resize', () => { resize(); });
+  setSize();
+  window.addEventListener('resize', () => { setSize(); });
 
-  // Init positions in a circle
+  // ── Background particles ──
+  const particles = Array.from({length: 40}, () => ({
+    x: Math.random() * cvs.width,
+    y: Math.random() * cvs.height,
+    r: Math.random() * 1.2 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    alpha: Math.random() * 0.4 + 0.1,
+  }));
+
+  // ── Node init — scattered from center with velocity ──
   const N = nodes.length;
   nodes.forEach((n, i) => {
-    const angle = (2 * Math.PI * i / N) - Math.PI/2;
-    const r = Math.min(cvs.width, cvs.height) * 0.33;
-    n.x = cvs.width/2 + r * Math.cos(angle);
-    n.y = cvs.height/2 + r * Math.sin(angle);
-    n.vx = 0; n.vy = 0;
-    n.r = 22;
+    const angle = (2 * Math.PI * i / N) - Math.PI / 2;
+    const spread = Math.min(cvs.width, cvs.height) * 0.15;
+    n.x = cvs.width/2 + (Math.random()-0.5)*spread;
+    n.y = cvs.height/2 + (Math.random()-0.5)*spread;
+    n.vx = Math.cos(angle) * 3;
+    n.vy = Math.sin(angle) * 3;
+    n.r = 28;
+    n.pulsePhase = Math.random() * Math.PI * 2; // unique pulse offset per node
+    n.enterT = 0; // enter animation progress 0→1
   });
 
-  // Force simulation
-  function simulate() {
+  // ── Edge animated flow (dashes moving along edges) ──
+  edges.forEach(e => { e.flowOffset = 0; });
+
+  // ── Force sim ──
+  function simulate(t) {
     const W = cvs.width, H = cvs.height;
-    const REPEL = 2400, DAMPING = 0.82, CENTER = 0.012;
+    const REPEL = 3200, DAMPING = 0.78, CENTER = 0.018;
 
     nodes.forEach(a => {
-      // Center gravity
       a.vx += (W/2 - a.x) * CENTER;
       a.vy += (H/2 - a.y) * CENTER;
-
-      // Node repulsion
       nodes.forEach(b => {
-        if (a === b) return;
-        const dx = a.x - b.x, dy = a.y - b.y;
+        if (a===b) return;
+        const dx = a.x-b.x, dy = a.y-b.y;
         const dist = Math.sqrt(dx*dx+dy*dy) || 1;
         const force = REPEL / (dist*dist);
         a.vx += dx/dist * force * 0.5;
@@ -996,164 +1041,227 @@ async function loadChemistry() {
       });
     });
 
-    // Edge springs — high compat = pull together, low = push apart
     edges.forEach(e => {
       const na = nodes.find(n=>n.id===e.a);
       const nb = nodes.find(n=>n.id===e.b);
-      if (!na || !nb) return;
-      const dx = nb.x - na.x, dy = nb.y - na.y;
+      if (!na||!nb) return;
+      const dx = nb.x-na.x, dy = nb.y-na.y;
       const dist = Math.sqrt(dx*dx+dy*dy) || 1;
-      // ideal distance: high compat = close, low = far
-      const ideal = 60 + (100 - e.score) * 2.2;
-      const stretch = (dist - ideal) * 0.04;
-      const fx = dx/dist * stretch, fy = dy/dist * stretch;
+      const ideal = 80 + (100-e.score) * 2.0;
+      const stretch = (dist-ideal) * 0.038;
+      const fx = dx/dist*stretch, fy = dy/dist*stretch;
       na.vx += fx; na.vy += fy;
       nb.vx -= fx; nb.vy -= fy;
+      // animate flow offset
+      e.flowOffset = (e.flowOffset + 0.4) % 30;
     });
 
     nodes.forEach(n => {
       n.vx *= DAMPING; n.vy *= DAMPING;
-      n.x += n.vx; n.y += n.vy;
-      // Boundary
-      n.x = Math.max(n.r+8, Math.min(W-n.r-8, n.x));
-      n.y = Math.max(n.r+8, Math.min(H-n.r-8, n.y));
+      n.x  += n.vx;    n.y  += n.vy;
+      n.x = Math.max(n.r+12, Math.min(W-n.r-12, n.x));
+      n.y = Math.max(n.r+12, Math.min(H-n.r-12, n.y));
+      n.enterT = Math.min(1, n.enterT + 0.04);
+      n.pulsePhase += 0.03;
     });
   }
 
-  function edgeColor(score) {
-    if (score >= 75) return 'rgba(0,230,118,';
-    if (score >= 50) return 'rgba(255,215,64,';
-    return 'rgba(255,77,109,';
+  function edgeRGB(score) {
+    if (score >= 75) return [0,230,118];
+    if (score >= 50) return [255,215,64];
+    return [255,77,109];
   }
 
-  function draw() {
+  function draw(t) {
     const W = cvs.width, H = cvs.height;
     ctx.clearRect(0,0,W,H);
 
-    // Draw edges
+    // Background particles
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(0,229,255,${p.alpha})`;
+      ctx.fill();
+    });
+
+    // Edges
     edges.forEach(e => {
       const na = nodes.find(n=>n.id===e.a);
       const nb = nodes.find(n=>n.id===e.b);
-      if (!na || !nb) return;
-      const isHov = hoveredEdge === e || hoveredNode === na || hoveredNode === nb;
-      const alpha = isHov ? 0.9 : 0.3;
-      const width = isHov ? 2.5 : (e.score/100) * 2 + 0.5;
+      if (!na||!nb) return;
+      const isHov = hoveredEdge===e || hoveredNode===na || hoveredNode===nb;
+      const [r,g,b] = edgeRGB(e.score);
+      const alpha = isHov ? 0.85 : 0.22 + (e.score/100)*0.2;
 
+      // Main line
       ctx.beginPath();
       ctx.moveTo(na.x, na.y);
       ctx.lineTo(nb.x, nb.y);
-      ctx.strokeStyle = edgeColor(e.score) + alpha + ')';
-      ctx.lineWidth = width;
+      ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+      ctx.lineWidth = isHov ? 2.5 : 1 + (e.score/100)*1.5;
       ctx.stroke();
 
-      // Score label on hover
+      // Animated flow dashes on high-compat edges
+      if (e.score >= 60 || isHov) {
+        const dx = nb.x-na.x, dy = nb.y-na.y;
+        const len = Math.sqrt(dx*dx+dy*dy);
+        const dashLen = 6, gap = 24;
+        ctx.save();
+        ctx.translate(na.x, na.y);
+        ctx.rotate(Math.atan2(dy, dx));
+        ctx.setLineDash([dashLen, gap]);
+        ctx.lineDashOffset = -e.flowOffset;
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.lineTo(len,0);
+        ctx.strokeStyle = `rgba(${r},${g},${b},${isHov ? 0.7 : 0.35})`;
+        ctx.lineWidth = isHov ? 2 : 1;
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+
+      // Score badge on hover
       if (isHov) {
         const mx = (na.x+nb.x)/2, my = (na.y+nb.y)/2;
-        ctx.fillStyle = edgeColor(e.score) + '1)';
+        const txt = `${e.score}%  ${e.a} × ${e.b}`;
         ctx.font = '500 11px IBM Plex Mono';
+        const tw = ctx.measureText(txt).width;
+        const pad = 8, bh = 20;
+        ctx.fillStyle = 'rgba(6,8,16,0.9)';
+        roundRect(ctx, mx-tw/2-pad, my-bh/2, tw+pad*2, bh, 3);
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${r},${g},${b},0.5)`;
+        ctx.lineWidth = 1;
+        roundRect(ctx, mx-tw/2-pad, my-bh/2, tw+pad*2, bh, 3);
+        ctx.stroke();
+        ctx.fillStyle = `rgba(${r},${g},${b},1)`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        // pill background
-        const txt = e.score + '%';
-        const tw = ctx.measureText(txt).width;
-        ctx.fillStyle = 'rgba(6,8,16,0.85)';
-        ctx.fillRect(mx-tw/2-6, my-9, tw+12, 18);
-        ctx.fillStyle = edgeColor(e.score) + '1)';
         ctx.fillText(txt, mx, my);
       }
     });
 
-    // Draw nodes
+    // Nodes
     nodes.forEach(n => {
-      const isHov = hoveredNode === n;
-      const r = isHov ? n.r + 4 : n.r;
+      const isHov = hoveredNode===n;
+      const pulse = 0.5 + 0.5*Math.sin(n.pulsePhase);
+      const baseR = n.r * n.enterT;
+      const r = isHov ? baseR + 5 : baseR;
+      const glowR = r * (2.5 + pulse * 0.5);
 
-      // Glow
-      const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r*2.5);
-      grd.addColorStop(0, 'rgba(0,229,255,0.15)');
-      grd.addColorStop(1, 'rgba(0,229,255,0)');
+      // Outer glow ring (pulsing)
+      const grdOuter = ctx.createRadialGradient(n.x,n.y,r*0.8,n.x,n.y,glowR);
+      grdOuter.addColorStop(0, `rgba(0,229,255,${isHov ? 0.25 : 0.08 + pulse*0.06})`);
+      grdOuter.addColorStop(1, 'rgba(0,229,255,0)');
       ctx.beginPath();
-      ctx.arc(n.x, n.y, r*2.5, 0, Math.PI*2);
-      ctx.fillStyle = grd;
+      ctx.arc(n.x, n.y, glowR, 0, Math.PI*2);
+      ctx.fillStyle = grdOuter;
       ctx.fill();
 
-      // Circle
+      // Second inner glow
+      const grdInner = ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r);
+      grdInner.addColorStop(0, isHov ? 'rgba(0,229,255,0.3)' : 'rgba(0,229,255,0.12)');
+      grdInner.addColorStop(1, 'rgba(6,8,16,0.95)');
       ctx.beginPath();
       ctx.arc(n.x, n.y, r, 0, Math.PI*2);
-      ctx.fillStyle = isHov ? 'rgba(0,229,255,0.18)' : 'rgba(17,21,32,0.9)';
+      ctx.fillStyle = grdInner;
       ctx.fill();
-      ctx.strokeStyle = isHov ? 'rgba(0,229,255,0.9)' : 'rgba(0,229,255,0.35)';
+
+      // Border ring
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI*2);
+      ctx.strokeStyle = isHov
+        ? `rgba(0,229,255,${0.8+pulse*0.2})`
+        : `rgba(0,229,255,${0.3+pulse*0.15})`;
       ctx.lineWidth = isHov ? 2 : 1.5;
       ctx.stroke();
 
-      // Name
-      ctx.fillStyle = isHov ? '#e8edf8' : '#b0bcd4';
+      // Second decorative ring (only on hover)
+      if (isHov) {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, r+7+pulse*3, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(0,229,255,${0.15*pulse})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Name text
+      ctx.fillStyle = isHov ? '#ffffff' : '#c8d4e8';
       ctx.font = (isHov ? '600' : '500') + ' 12px IBM Plex Mono';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(n.id, n.x, n.y - 3);
+      ctx.fillText(n.id, n.x, n.y - 5);
 
-      // MBTI
-      ctx.fillStyle = 'rgba(0,229,255,0.7)';
-      ctx.font = '300 9px IBM Plex Mono';
-      ctx.fillText(n.mbti, n.x, n.y + 9);
+      // MBTI below name
+      ctx.fillStyle = `rgba(0,229,255,${isHov ? 0.9 : 0.55})`;
+      ctx.font = '400 9px IBM Plex Mono';
+      ctx.fillText(n.mbti + (n.variant ? '-'+n.variant : ''), n.x, n.y + 8);
     });
   }
 
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
   let tick = 0;
-  function loop() {
-    if (tick < 180) { simulate(); tick++; }
-    else if (hoveredNode || hoveredEdge) { simulate(); }
-    draw();
+  function loop(t) {
+    if (tick < 220 || hoveredNode || hoveredEdge) simulate(t);
+    tick++;
+    draw(t);
     animFrame = requestAnimationFrame(loop);
   }
 
   if (animFrame) cancelAnimationFrame(animFrame);
-  loop();
+  animFrame = requestAnimationFrame(loop);
 
-  // Hover detection
-  cvs.onmousemove = (e) => {
+  // ── Interaction ──
+  cvs.onmousemove = (ev) => {
     const rect = cvs.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) * (cvs.width / rect.width);
-    const my = (e.clientY - rect.top) * (cvs.height / rect.height);
-
-    hoveredNode = null;
-    hoveredEdge = null;
+    const mx = (ev.clientX - rect.left) * (cvs.width / rect.width);
+    const my = (ev.clientY - rect.top)  * (cvs.height / rect.height);
+    hoveredNode = null; hoveredEdge = null;
 
     for (const n of nodes) {
-      const dx = mx - n.x, dy = my - n.y;
-      if (Math.sqrt(dx*dx+dy*dy) < n.r + 6) { hoveredNode = n; break; }
+      if (Math.hypot(mx-n.x, my-n.y) < n.r+8) { hoveredNode = n; break; }
     }
 
     if (!hoveredNode) {
       for (const edge of edges) {
         const na = nodes.find(n=>n.id===edge.a);
         const nb = nodes.find(n=>n.id===edge.b);
-        if (!na || !nb) continue;
-        // point-to-segment distance
-        const dx = nb.x-na.x, dy = nb.y-na.y;
-        const len2 = dx*dx+dy*dy;
-        const t = Math.max(0,Math.min(1,((mx-na.x)*dx+(my-na.y)*dy)/len2));
-        const px = na.x+t*dx, py = na.y+t*dy;
-        const dist = Math.sqrt((mx-px)**2+(my-py)**2);
-        if (dist < 10) { hoveredEdge = edge; break; }
+        if (!na||!nb) continue;
+        const dx=nb.x-na.x, dy=nb.y-na.y, len2=dx*dx+dy*dy;
+        const t=Math.max(0,Math.min(1,((mx-na.x)*dx+(my-na.y)*dy)/len2));
+        if (Math.hypot(mx-(na.x+t*dx), my-(na.y+t*dy)) < 12) { hoveredEdge = edge; break; }
       }
     }
 
-    cvs.style.cursor = (hoveredNode || hoveredEdge) ? 'pointer' : 'default';
+    cvs.style.cursor = (hoveredNode||hoveredEdge) ? 'pointer' : 'default';
   };
 
-  cvs.onmouseleave = () => { hoveredNode = null; hoveredEdge = null; };
+  cvs.onmouseleave = () => { hoveredNode=null; hoveredEdge=null; };
 
-  cvs.onclick = (e) => {
-    if (hoveredEdge) quickCompare(hoveredEdge.a, hoveredEdge.b);
+  cvs.onclick = () => {
+    if (hoveredEdge) { quickCompare(hoveredEdge.a, hoveredEdge.b); return; }
     if (hoveredNode) {
-      // find best partner for this node
       const nodeEdges = edges.filter(ed=>ed.a===hoveredNode.id||ed.b===hoveredNode.id);
       if (nodeEdges.length) {
         const best = nodeEdges.reduce((b,x)=>x.score>b.score?x:b);
-        const partner = best.a===hoveredNode.id ? best.b : best.a;
-        quickCompare(hoveredNode.id, partner);
+        quickCompare(hoveredNode.id, best.a===hoveredNode.id ? best.b : best.a);
       }
     }
   };

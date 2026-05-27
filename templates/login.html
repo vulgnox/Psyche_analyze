@@ -3,22 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PSYCHE — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<title>PSYCHE — Access</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #080a0e;
-    --bg2: #0d1017;
-    --bg3: #131820;
-    --border: #1e2530;
-    --accent: #e8c547;
-    --accent2: #4f8ef7;
-    --accent3: #e05a5a;
-    --text: #c8d0dc;
-    --text-dim: #5a6478;
-    --text-bright: #eef2f8;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Syne', sans-serif;
+    --bg:       #060810;
+    --bg2:      #0c0f1a;
+    --bg3:      #111520;
+    --bg4:      #171c2a;
+    --border:   #1f2740;
+    --border2:  #2a3450;
+    --accent:   #00e5ff;
+    --accent2:  #7c4dff;
+    --accent3:  #ff4d6d;
+    --green:    #00e676;
+    --text:     #b0bcd4;
+    --text-dim: #44536e;
+    --text-hi:  #e8edf8;
+    --mono:     'IBM Plex Mono', monospace;
+    --display:  'Rajdhani', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,121 +35,300 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
     overflow: hidden;
   }
 
+  /* Grid background */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
     pointer-events: none;
-    z-index: 9999;
-    opacity: 0.5;
+  }
+
+  /* Corner accent lines */
+  .corner {
+    position: fixed;
+    width: 120px;
+    height: 120px;
+    pointer-events: none;
+  }
+  .corner-tl { top: 24px; left: 24px; border-top: 1px solid rgba(0,229,255,0.2); border-left: 1px solid rgba(0,229,255,0.2); }
+  .corner-tr { top: 24px; right: 24px; border-top: 1px solid rgba(0,229,255,0.2); border-right: 1px solid rgba(0,229,255,0.2); }
+  .corner-bl { bottom: 24px; left: 24px; border-bottom: 1px solid rgba(0,229,255,0.2); border-left: 1px solid rgba(0,229,255,0.2); }
+  .corner-br { bottom: 24px; right: 24px; border-bottom: 1px solid rgba(0,229,255,0.2); border-right: 1px solid rgba(0,229,255,0.2); }
+
+  .scan-line {
+    position: fixed;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.6), transparent);
+    animation: scan 4s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes scan {
+    0%   { top: -2px; opacity: 1; }
+    90%  { opacity: 0.8; }
+    100% { top: 100vh; opacity: 0; }
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 400px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-block {
+    margin-bottom: 36px;
+    text-align: center;
+  }
+
+  .logo {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 52px;
+    letter-spacing: 0.25em;
+    color: var(--text-hi);
+    line-height: 1;
+    position: relative;
+    display: inline-block;
+  }
+
+  .logo::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .logo-sub {
+    margin-top: 10px;
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
   }
 
   .box {
     background: var(--bg2);
     border: 1px solid var(--border);
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 360px;
-    border-radius: 2px;
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,229,255,0.04) inset;
   }
 
-  .logo {
-    font-family: var(--sans);
-    font-weight: 800;
-    font-size: 32px;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    margin-bottom: 4px;
+  /* Tabs */
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
   }
 
-  .sub {
-    color: var(--text-dim);
+  .tab-btn {
+    background: none;
+    border: none;
+    padding: 14px;
+    font-family: var(--mono);
     font-size: 11px;
-    letter-spacing: 0.1em;
-    margin-bottom: 36px;
-  }
-
-  label {
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    color: var(--text-dim);
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    display: block;
-    margin-bottom: 6px;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
   }
 
-  input[type=password] {
+  .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(0,229,255,0.03); }
+
+  .form-wrap { padding: 32px 28px; }
+
+  .field { margin-bottom: 20px; }
+
+  .field label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .field input {
     width: 100%;
     background: var(--bg3);
     border: 1px solid var(--border);
-    color: var(--text-bright);
-    padding: 12px 14px;
+    border-radius: 2px;
+    color: var(--text-hi);
+    padding: 11px 14px;
     font-family: var(--mono);
     font-size: 13px;
-    border-radius: 2px;
     outline: none;
-    transition: border-color 0.15s;
-    margin-bottom: 16px;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
 
-  input[type=password]:focus { border-color: var(--accent); }
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
+  }
 
-  button {
+  .field input::placeholder { color: var(--text-dim); }
+
+  .submit-btn {
     width: 100%;
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
     padding: 12px;
     font-family: var(--mono);
     font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
     cursor: pointer;
     border-radius: 2px;
-    text-transform: uppercase;
-    transition: background 0.15s;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
   }
 
-  button:hover { background: #f0d060; }
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s;
+    z-index: 0;
+  }
 
-  .error {
+  .submit-btn:hover::before { transform: scaleX(1); }
+  .submit-btn:hover { color: var(--bg); }
+  .submit-btn span { position: relative; z-index: 1; }
+
+  .error-msg {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.25);
+    border-radius: 2px;
     color: var(--accent3);
     font-size: 11px;
-    margin-top: 12px;
     letter-spacing: 0.06em;
   }
 
   .hint {
+    margin-top: 20px;
+    text-align: center;
     color: var(--text-dim);
     font-size: 10px;
-    margin-top: 24px;
-    letter-spacing: 0.06em;
-    line-height: 1.6;
+    letter-spacing: 0.1em;
+    line-height: 1.8;
   }
+
+  .hint a { color: var(--accent2); text-decoration: none; }
+
+  /* Tab panels */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 </style>
 </head>
 <body>
-<div class="box">
-  <div class="logo">PSYCHE</div>
-  <div class="sub">personality engine — group access</div>
 
-  <form method="POST">
-    <label>Group Password</label>
-    <input type="password" name="password" placeholder="enter password" autofocus>
-    <button type="submit">Enter</button>
-    {% if error %}
-    <div class="error">// {{ error }}</div>
-    {% endif %}
-  </form>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+<div class="scan-line"></div>
+
+<div class="wrap">
+  <div class="logo-block">
+    <div class="logo">PSYCHE</div>
+    <div class="logo-sub">personality engine</div>
+  </div>
+
+  <div class="box">
+    <div class="tabs">
+      <button class="tab-btn {% if tab == 'login' or not tab %}active{% endif %}" onclick="switchTab('login', this)">Sign In</button>
+      <button class="tab-btn {% if tab == 'register' %}active{% endif %}" onclick="switchTab('register', this)">Register</button>
+    </div>
+
+    <div class="form-wrap">
+      <!-- LOGIN -->
+      <div class="tab-panel {% if tab == 'login' or not tab %}active{% endif %}" id="panel-login">
+        <form method="POST">
+          <input type="hidden" name="action" value="login">
+          <div class="field">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="your handle" autocomplete="username" autofocus>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <button type="submit" class="submit-btn"><span>Enter System</span></button>
+          {% if error and (tab == 'login' or not tab) %}
+          <div class="error-msg">// {{ error }}</div>
+          {% endif %}
+        </form>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="tab-panel {% if tab == 'register' %}active{% endif %}" id="panel-register">
+        <form method="POST">
+          <input type="hidden" name="action" value="register">
+          <div class="field">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="pick a handle" autocomplete="username">
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="••••••••" autocomplete="new-password">
+          </div>
+          <button type="submit" class="submit-btn"><span>Create Account</span></button>
+          {% if error and tab == 'register' %}
+          <div class="error-msg">// {{ error }}</div>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
 
   <div class="hint">
-    don't have the password? ask your group.<br>
-    discord: <span style="color:var(--accent2)">vulgnox</span>
+    share this with your group — everyone needs an account<br>
+    discord: <a href="#">vulgnox</a>
   </div>
 </div>
+
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  // update hidden input in active form
+  document.querySelector('#panel-' + id + ' input[name=action]').value = id;
+}
+</script>
 </body>
 </html>
