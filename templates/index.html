@@ -19,6 +19,7 @@
   --accent3:  #ff4d6d;
   --green:    #00e676;
   --yellow:   #ffd740;
+  --orange:   #ff9100;
   --text:     #b0bcd4;
   --text-dim: #44536e;
   --text-hi:  #e8edf8;
@@ -37,7 +38,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Grid bg ── */
 body::before {
   content:'';
   position:fixed; inset:0;
@@ -83,9 +83,7 @@ body::before {
   50%{ opacity:0.5; transform:scale(0.7); }
 }
 
-.topbar-right {
-  display:flex; align-items:center; gap:20px;
-}
+.topbar-right { display:flex; align-items:center; gap:20px; }
 
 .user-badge {
   display:flex; align-items:center; gap:8px;
@@ -116,6 +114,7 @@ body::before {
   padding: 0 28px;
   display:flex; gap:0;
   position:sticky; top:56px; z-index:99;
+  overflow-x: auto;
 }
 
 .nav-tab {
@@ -128,11 +127,13 @@ body::before {
   margin-bottom: -1px;
   transition: all 0.15s;
   display:flex; align-items:center; gap:8px;
+  white-space: nowrap;
 }
 
 .nav-tab .nav-ico { font-size:13px; }
 .nav-tab:hover { color: var(--text); }
 .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.nav-tab.ennea-tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
 
 /* ── Main layout ── */
 .shell {
@@ -173,6 +174,7 @@ body::before {
 .pc-left { display:flex; flex-direction:column; gap:3px; }
 .pc-name { color: var(--text-hi); font-size:12px; font-weight:500; }
 .pc-type { color: var(--accent); font-size:10px; letter-spacing:0.06em; }
+.pc-ennea { color: var(--orange); font-size:9px; letter-spacing:0.04em; margin-top:1px; }
 .pc-owner { color: var(--text-dim); font-size:9px; letter-spacing:0.04em; }
 
 .pc-del {
@@ -223,10 +225,10 @@ body::before {
   box-shadow: 0 0 6px var(--accent);
 }
 
-/* ── Dashboard header ── */
-.panel-header {
-  margin-bottom:24px;
-}
+.card-title.ennea::before { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+
+/* ── Panel header ── */
+.panel-header { margin-bottom:24px; }
 
 .panel-title {
   font-family: var(--display);
@@ -270,12 +272,15 @@ body::before {
   box-shadow: 0 0 0 3px rgba(0,229,255,0.06);
 }
 
+.fgroup.ennea-field input:focus, .fgroup.ennea-field select:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255,145,0,0.06);
+}
+
 .fgroup select option { background: var(--bg3); }
 
 /* ── Sliders ── */
-.traits-grid {
-  display:grid; gap:10px; margin-bottom:18px;
-}
+.traits-grid { display:grid; gap:10px; margin-bottom:18px; }
 
 .trait-row {
   display:grid; grid-template-columns:130px 1fr 46px;
@@ -319,6 +324,19 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 .btn:hover { background:#33ecff; box-shadow: 0 0 24px rgba(0,229,255,0.3); }
 .btn:disabled { opacity:0.35; cursor:not-allowed; }
 
+.btn-ennea {
+  background: var(--orange);
+  color: var(--bg); border:none;
+  padding:10px 22px;
+  font-family: var(--mono); font-size:11px; font-weight:600;
+  letter-spacing:0.15em; text-transform:uppercase;
+  cursor:pointer; border-radius:2px;
+  transition: all 0.15s;
+  box-shadow: 0 0 16px rgba(255,145,0,0.15);
+}
+
+.btn-ennea:hover { background:#ffab40; box-shadow: 0 0 24px rgba(255,145,0,0.3); }
+
 .btn-ghost {
   background:none; border:1px solid var(--border2);
   color: var(--text); padding:9px 18px;
@@ -359,11 +377,12 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 
 .pm-name { font-family:var(--display); font-size:18px; font-weight:700; color:var(--text-hi); }
 .pm-type { color:var(--accent); font-size:11px; letter-spacing:0.08em; margin-top:2px; }
+.pm-ennea { color:var(--orange); font-size:10px; letter-spacing:0.06em; margin-top:4px; }
 .pm-desc { color:var(--text-dim); font-size:10px; margin-top:4px; }
 .pm-rarity { color:var(--accent3); font-size:9px; margin-top:4px; }
 
 .compat-hero {
-  display:flex; align-items:baseline; gap:8px; margin-bottom:20px;
+  display:flex; align-items:baseline; gap:8px; margin-bottom:8px;
 }
 
 .compat-num {
@@ -373,6 +392,20 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 }
 
 .compat-label { color:var(--text-dim); font-size:10px; letter-spacing:0.15em; }
+
+.compat-row { display:flex; gap:20px; margin-bottom:20px; align-items:flex-end; flex-wrap:wrap; }
+
+.compat-secondary {
+  display:flex; flex-direction:column; gap:4px;
+}
+
+.compat-secondary-num {
+  font-family: var(--display);
+  font-size:32px; font-weight:700; line-height:1;
+  text-shadow: 0 0 16px currentColor;
+}
+
+.compat-secondary-label { color:var(--text-dim); font-size:9px; letter-spacing:0.12em; }
 
 .bar-group { margin-bottom:20px; }
 
@@ -400,6 +433,10 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
   padding-left:16px;
 }
 
+.analysis-block.ennea {
+  border-left-color: var(--orange);
+}
+
 /* ── Group ── */
 .pairs-grid {
   display:grid;
@@ -419,9 +456,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 .pair-score span { font-size:12px; color:var(--text-dim); font-family:var(--mono); }
 
 /* ── Suggest ── */
-.chip-select {
-  display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;
-}
+.chip-select { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
 
 .sel-chip {
   padding:6px 12px;
@@ -447,39 +482,27 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
   cursor: grab;
 }
 #chem-canvas-wrap:active { cursor: grabbing; }
-
-#chem-canvas {
-  width:100%; height:100%; display:block;
-}
+#chem-canvas { width:100%; height:100%; display:block; }
 
 #chem-tooltip {
-  position:absolute;
-  pointer-events:none;
+  position:absolute; pointer-events:none;
   background: rgba(6,8,16,0.94);
   border: 1px solid var(--border2);
-  border-radius: 3px;
-  padding: 8px 14px;
-  font-size: 11px;
-  color: var(--text-hi);
-  letter-spacing: 0.06em;
-  display: none;
-  z-index: 10;
-  white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  border-radius: 3px; padding: 8px 14px;
+  font-size: 11px; color: var(--text-hi);
+  letter-spacing: 0.06em; display: none; z-index: 10;
+  white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 #chem-hint {
-  position:absolute;
-  bottom:10px; right:14px;
+  position:absolute; bottom:10px; right:14px;
   font-size:9px; color:var(--text-dim);
   letter-spacing:0.1em; pointer-events:none;
 }
 
 #chem-controls {
-  position:absolute;
-  top:12px; right:14px;
-  display:flex; gap:6px;
-  z-index:10;
+  position:absolute; top:12px; right:14px;
+  display:flex; gap:6px; z-index:10;
 }
 
 .chem-ctrl-btn {
@@ -487,8 +510,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
   border: 1px solid var(--border2);
   color: var(--text-dim);
   width:28px; height:28px;
-  border-radius:2px;
-  font-size:14px; line-height:1;
+  border-radius:2px; font-size:14px; line-height:1;
   cursor:pointer; display:flex;
   align-items:center; justify-content:center;
   transition:all 0.15s; font-family:var(--mono);
@@ -501,26 +523,85 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 }
 
 .legend-item { display:flex; align-items:center; gap:6px; }
-.legend-dot { width:8px; height:8px; border-radius:50%; }
 
-.chem-stats {
-  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
-  margin-bottom:16px;
+.legend-dot {
+  width:8px; height:8px; border-radius:50%;
 }
 
-.stat-box {
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:3px; padding:14px 16px;
+/* ── Enneagram panel ── */
+.sub-tab-strip {
+  display:flex; gap:0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom:24px;
 }
 
-.stat-num {
-  font-family:var(--display); font-size:32px; font-weight:700;
-  line-height:1; color:var(--text-hi);
+.sub-tab {
+  background:none; border:none; cursor:pointer;
+  font-family: var(--mono); font-size:10px;
+  letter-spacing: 0.14em; text-transform:uppercase;
+  color: var(--text-dim);
+  padding: 10px 18px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
 }
 
-.stat-label { color:var(--text-dim); font-size:9px; letter-spacing:0.15em; text-transform:uppercase; margin-top:4px; }
+.sub-tab:hover { color: var(--text); }
+.sub-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
 
-/* ── Tags ── */
+.ennea-subpanel { display:none; }
+.ennea-subpanel.active { display:block; animation: fadeIn 0.15s ease; }
+
+/* ── Enneagram diagram ── */
+.ennea-diagram-wrap {
+  display:flex; gap:24px; align-items:flex-start;
+  margin-bottom:16px; flex-wrap:wrap;
+}
+
+.ennea-diagram-svg {
+  flex-shrink:0;
+  background: var(--bg3);
+  border:1px solid var(--border);
+  border-radius:3px;
+}
+
+.ennea-diagram-info {
+  flex:1; min-width:200px;
+  display:flex; flex-direction:column; gap:12px;
+}
+
+/* Arrow badges */
+.arrow-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px;
+  border-radius:2px; font-size:10px; letter-spacing:0.08em;
+  margin:3px 0;
+}
+
+.arrow-growth { background:rgba(0,230,118,0.1); color:var(--green); border:1px solid rgba(0,230,118,0.2); }
+.arrow-stress  { background:rgba(255,77,109,0.1); color:var(--accent3); border:1px solid rgba(255,77,109,0.2); }
+.arrow-none    { background:var(--bg3); color:var(--text-dim); border:1px solid var(--border); }
+
+.center-badge {
+  display:inline-block; padding:3px 10px;
+  font-size:9px; letter-spacing:0.12em; border-radius:2px;
+  margin-left:6px;
+}
+.center-gut   { background:rgba(255,145,0,0.1); color:var(--orange); border:1px solid rgba(255,145,0,0.2); }
+.center-heart { background:rgba(255,77,109,0.1); color:var(--accent3); border:1px solid rgba(255,77,109,0.2); }
+.center-head  { background:rgba(0,229,255,0.1); color:var(--accent); border:1px solid rgba(0,229,255,0.2); }
+
+/* Center distribution bar */
+.center-dist {
+  display:flex; gap:0; height:8px; border-radius:3px; overflow:hidden;
+  margin-bottom:4px;
+}
+.center-seg { height:100%; transition: width 0.6s ease; }
+.center-gut-seg   { background: var(--orange); }
+.center-heart-seg { background: var(--accent3); }
+.center-head-seg  { background: var(--accent); }
+
+/* Tags */
 .tag {
   display:inline-block; padding:2px 7px;
   font-size:9px; letter-spacing:0.1em; border-radius:2px; margin-right:4px;
@@ -528,6 +609,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 .tag-c { background:rgba(0,229,255,0.08); color:var(--accent); border:1px solid rgba(0,229,255,0.2); }
 .tag-p { background:rgba(124,77,255,0.08); color:var(--accent2); border:1px solid rgba(124,77,255,0.2); }
 .tag-r { background:rgba(255,77,109,0.08); color:var(--accent3); border:1px solid rgba(255,77,109,0.2); }
+.tag-o { background:rgba(255,145,0,0.08); color:var(--orange); border:1px solid rgba(255,145,0,0.2); }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -561,6 +643,9 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
   </button>
   <button class="nav-tab" onclick="showPanel('suggest', this)">
     <span class="nav-ico">⬡</span> Roles
+  </button>
+  <button class="nav-tab ennea-tab-btn" onclick="showPanel('enneagram', this)">
+    <span class="nav-ico">✦</span> Enneagram
   </button>
 </div>
 
@@ -639,10 +724,52 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
             <span class="t-val" id="v-assertive">50</span>
           </div>
         </div>
-        <div class="btn-row">
-          <button class="btn" onclick="addFriend()">Save Profile</button>
-          <div id="add-msg"></div>
+      </div>
+
+      <!-- Enneagram card -->
+      <div class="card" style="border-color:rgba(255,145,0,0.2)">
+        <div class="card-title ennea">Enneagram <span style="font-weight:400;font-size:10px;color:var(--text-dim);margin-left:8px;letter-spacing:0.05em;font-family:var(--mono);">(optional)</span></div>
+        <div class="form-grid">
+          <div class="fgroup ennea-field">
+            <label>Enneagram Type</label>
+            <select id="f-ennea-type" onchange="updateWingOptions()">
+              <option value="">— none / unknown —</option>
+              <option value="1">1 — Reformer</option>
+              <option value="2">2 — Helper</option>
+              <option value="3">3 — Achiever</option>
+              <option value="4">4 — Individualist</option>
+              <option value="5">5 — Investigator</option>
+              <option value="6">6 — Loyalist</option>
+              <option value="7">7 — Enthusiast</option>
+              <option value="8">8 — Challenger</option>
+              <option value="9">9 — Peacemaker</option>
+            </select>
+          </div>
+          <div class="fgroup ennea-field">
+            <label>Wing</label>
+            <select id="f-ennea-wing">
+              <option value="">— select type first —</option>
+            </select>
+          </div>
+          <div class="fgroup ennea-field">
+            <label>Instinct Variant</label>
+            <select id="f-ennea-instinct">
+              <option value="">— unknown —</option>
+              <option value="sp">sp — Self-Preservation</option>
+              <option value="sx">sx — Sexual / One-to-One</option>
+              <option value="so">so — Social</option>
+            </select>
+          </div>
+          <div class="fgroup ennea-field">
+            <label>Tritype (optional)</label>
+            <input type="text" id="f-ennea-tritype" placeholder="e.g. 459 or 5w4 / 9w8 / 4w5">
+          </div>
         </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:4px;">
+        <button class="btn" onclick="addFriend()">Save Profile</button>
+        <div id="add-msg"></div>
       </div>
     </div>
 
@@ -737,6 +864,46 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
       <div id="suggest-result"></div>
     </div>
 
+    <!-- ── ENNEAGRAM ── -->
+    <div class="panel" id="panel-enneagram">
+      <div class="panel-header">
+        <div class="panel-title" style="color:var(--orange)">Enneagram</div>
+        <div class="panel-sub">type dynamics · growth & stress arrows · instinct compatibility</div>
+      </div>
+
+      <div class="sub-tab-strip">
+        <button class="sub-tab active" onclick="showEnneaTab('compare', this)">Compare</button>
+        <button class="sub-tab" onclick="showEnneaTab('group', this)">Group Analysis</button>
+      </div>
+
+      <!-- Enneagram Compare -->
+      <div class="ennea-subpanel active" id="epanel-compare">
+        <div class="card" style="border-color:rgba(255,145,0,0.15)">
+          <div class="select-row">
+            <div class="fgroup">
+              <label>Person A</label>
+              <select id="ecmp-a"></select>
+            </div>
+            <div class="fgroup">
+              <label>Person B</label>
+              <select id="ecmp-b"></select>
+            </div>
+            <button class="btn-ennea" onclick="doEnneaCompare()">Analyze</button>
+          </div>
+        </div>
+        <div id="ennea-compare-result"></div>
+      </div>
+
+      <!-- Enneagram Group -->
+      <div class="ennea-subpanel" id="epanel-group">
+        <div class="card" style="border-color:rgba(255,145,0,0.15)">
+          <p style="font-size:11px;color:var(--text-dim);margin-bottom:14px;">Only profiles with Enneagram data are included.</p>
+          <button class="btn-ennea" onclick="doEnneaGroup()">Run Enneagram Group Analysis</button>
+        </div>
+        <div id="ennea-group-result"></div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /shell -->
 
@@ -756,6 +923,46 @@ const RARITY = {
   INTJ:2,INFJ:2,ENTJ:3,ENFJ:3,INTP:4,INFP:5,ENTP:4,ENFP:7,
   ISTJ:12,ISFJ:13,ESTJ:9,ESFJ:12,ISTP:5,ISFP:6,ESTP:5,ESFP:7
 };
+
+// Enneagram data (mirrors app.py)
+const ENNEA_TYPES = {
+  1:"Reformer",2:"Helper",3:"Achiever",4:"Individualist",
+  5:"Investigator",6:"Loyalist",7:"Enthusiast",8:"Challenger",9:"Peacemaker"
+};
+
+const ENNEA_WINGS = {
+  1:[9,2],2:[1,3],3:[2,4],4:[3,5],
+  5:[4,6],6:[5,7],7:[6,8],8:[7,9],9:[8,1]
+};
+
+const ENNEA_GROWTH = {1:7,2:4,3:6,4:1,5:8,6:9,7:5,8:2,9:3};
+const ENNEA_STRESS = {1:4,2:8,3:9,4:2,5:7,6:3,7:1,8:5,9:6};
+
+const ENNEA_CENTER = {
+  gut:[8,9,1], heart:[2,3,4], head:[5,6,7]
+};
+
+const CENTER_COLORS = {
+  gut:'#ff9100', heart:'#ff4d6d', head:'#00e5ff'
+};
+
+// Node positions for enneagram circle diagram (300x300, r=110, center 150,150)
+// type 9 at top, clockwise
+const ENNEA_POS = (() => {
+  const pos = {};
+  const types = [9,1,2,3,4,5,6,7,8];
+  types.forEach((t, i) => {
+    const angle = (-90 + i * 40) * Math.PI / 180;
+    pos[t] = { x: 150 + 110 * Math.cos(angle), y: 150 + 110 * Math.sin(angle) };
+  });
+  return pos;
+})();
+
+// Classic inner lines: hexad 1-4-2-8-5-7-1, triangle 3-6-9
+const ENNEA_INNER_LINES = [
+  [1,4],[4,2],[2,8],[8,5],[5,7],[7,1],   // hexad
+  [3,6],[6,9],[9,3]                       // triangle
+];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function scoreColor(s) {
@@ -778,15 +985,60 @@ function updateTraitLabels() {
   document.getElementById('lb-assertive').textContent   = v==='A'    ? 'Assertive %'   : 'Turbulent %';
 }
 
-// ── Panel nav ────────────────────────────────────────────────────────────────
+function updateWingOptions() {
+  const t = parseInt(document.getElementById('f-ennea-type').value);
+  const sel = document.getElementById('f-ennea-wing');
+  if (!t) {
+    sel.innerHTML = '<option value="">— select type first —</option>';
+    return;
+  }
+  const wings = ENNEA_WINGS[t] || [];
+  sel.innerHTML = '<option value="">— unknown —</option>' +
+    wings.map(w => `<option value="${t}w${w}">${t}w${w}</option>`).join('');
+}
+
+function enneaCenter(t) {
+  if (!t) return '';
+  t = parseInt(t);
+  for (const [c, types] of Object.entries(ENNEA_CENTER)) {
+    if (types.includes(t)) return c;
+  }
+  return '';
+}
+
+function centerBadgeHTML(c) {
+  if (!c) return '';
+  const labels = { gut:'Gut', heart:'Heart', head:'Head' };
+  return `<span class="center-badge center-${c}">${labels[c]||c}</span>`;
+}
+
+function enneaSummary(f) {
+  const ea = f.enneagram || {};
+  if (!ea.type) return '';
+  let s = `${ea.type}w${(ea.wing||'').split('w')[1]||'?'}`;
+  if (ea.instinct) s += ` ${ea.instinct}`;
+  if (ea.tritype)  s += ` [${ea.tritype}]`;
+  return s;
+}
+
+// ── Panel nav ─────────────────────────────────────────────────────────────────
 function showPanel(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
-  if (id === 'compare')   populateSelects();
-  if (id === 'suggest')   populateSuggestChips();
-  if (id === 'chemistry') requestAnimationFrame(() => requestAnimationFrame(loadChemistry));
+  if (id === 'compare')    populateSelects();
+  if (id === 'suggest')    populateSuggestChips();
+  if (id === 'enneagram')  { populateEnneaSelects(); }
+  if (id === 'chemistry')  requestAnimationFrame(() => requestAnimationFrame(loadChemistry));
+}
+
+function showEnneaTab(id, btn) {
+  document.querySelectorAll('.ennea-subpanel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('epanel-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'compare') populateEnneaSelects();
 }
 
 // ── Friend list ───────────────────────────────────────────────────────────────
@@ -804,11 +1056,14 @@ function renderFriendList() {
   }
   el.innerHTML = friends.map(f => {
     const mine = f.owner === CURRENT_USER;
+    const ea = f.enneagram || {};
+    const enneaStr = ea.type ? `E${ea.type}${ea.wing ? 'w'+(ea.wing||'').split('w')[1] : ''}${ea.instinct?' '+ea.instinct:''}` : '';
     return `
       <div class="profile-card ${mine ? 'is-mine' : ''}">
         <div class="pc-left">
           <div class="pc-name">${f.name}</div>
           <div class="pc-type">${f.mbti}-${f.variant || '?'} · ${MBTI_DESC[f.mbti] || ''}</div>
+          ${enneaStr ? `<div class="pc-ennea">✦ ${enneaStr}</div>` : ''}
           <div class="pc-owner">by ${f.owner || 'unknown'}</div>
         </div>
         ${mine ? `<span class="pc-del" onclick="deleteFriend('${f.name}')">×</span>` : ''}
@@ -820,10 +1075,7 @@ function renderFriendList() {
 async function deleteFriend(name) {
   const res = await fetch('/api/friends/' + encodeURIComponent(name), { method: 'DELETE' });
   const data = await res.json();
-  if (data.status !== 'ok') {
-    alert(data.message || 'Cannot delete');
-    return;
-  }
+  if (data.status !== 'ok') { alert(data.message || 'Cannot delete'); return; }
   await loadFriends();
 }
 
@@ -831,18 +1083,27 @@ async function addFriend() {
   const name = document.getElementById('f-name').value.trim();
   if (!name) { document.getElementById('add-msg').innerHTML = '<span class="msg-err">name required</span>'; return; }
 
+  const enneaType = document.getElementById('f-ennea-type').value;
+  const enneagram = enneaType ? {
+    type:     parseInt(enneaType),
+    wing:     document.getElementById('f-ennea-wing').value || null,
+    instinct: document.getElementById('f-ennea-instinct').value || null,
+    tritype:  document.getElementById('f-ennea-tritype').value.trim() || null,
+  } : null;
+
   const friend = {
     name,
-    mbti: document.getElementById('f-mbti').value,
+    mbti:    document.getElementById('f-mbti').value,
     variant: document.getElementById('f-variant').value,
-    notes: document.getElementById('f-notes').value,
+    notes:   document.getElementById('f-notes').value,
     traits: {
       introverted: +document.getElementById('t-introverted').value,
       intuitive:   +document.getElementById('t-intuitive').value,
       thinking:    +document.getElementById('t-thinking').value,
       judging:     +document.getElementById('t-judging').value,
       assertive:   +document.getElementById('t-assertive').value,
-    }
+    },
+    enneagram,
   };
 
   const res = await fetch('/api/friends', {
@@ -855,13 +1116,15 @@ async function addFriend() {
   if (data.status === 'ok') {
     document.getElementById('add-msg').innerHTML = `<span class="msg-ok">✓ saved — ${name}</span>`;
     document.getElementById('f-name').value = '';
+    document.getElementById('f-ennea-type').value = '';
+    updateWingOptions();
   } else {
     document.getElementById('add-msg').innerHTML = `<span class="msg-err">${data.message}</span>`;
   }
   await loadFriends();
 }
 
-// ── Compare ───────────────────────────────────────────────────────────────────
+// ── MBTI Compare ──────────────────────────────────────────────────────────────
 function populateSelects() {
   ['cmp-a','cmp-b'].forEach(id => {
     const sel = document.getElementById(id);
@@ -885,25 +1148,43 @@ async function doCompare() {
   const col = scoreColor(sc);
   const traits = ['introverted','intuitive','thinking','judging','assertive'];
 
+  const enneaA = d.a.enneagram || {};
+  const enneaB = d.b.enneagram || {};
+  const hasEnnea = enneaA.type && enneaB.type;
+
+  const enneaScoreHtml = hasEnnea && d.ennea_compat != null ? `
+    <div class="compat-secondary">
+      <div class="compat-secondary-num" style="color:${scoreColor(d.ennea_compat)}">${d.ennea_compat}</div>
+      <div class="compat-secondary-label">✦ Enneagram compat%</div>
+    </div>
+  ` : '';
+
   document.getElementById('compare-result').innerHTML = `
     <div class="card">
       <div class="profile-pair">
         <div class="profile-mini">
           <div class="pm-name">${d.a.name}</div>
           <div class="pm-type">${d.a.mbti}-${d.a.variant||'?'} · ${MBTI_DESC[d.a.mbti]||''}</div>
+          ${enneaA.type ? `<div class="pm-ennea">✦ ${enneaSummary(d.a)} — ${ENNEA_TYPES[enneaA.type]||''}</div>` : ''}
           <div class="pm-desc">${d.a.notes || ''}</div>
           <div class="pm-rarity">~${RARITY[d.a.mbti]||'?'}% of population</div>
         </div>
         <div class="profile-mini">
           <div class="pm-name">${d.b.name}</div>
           <div class="pm-type">${d.b.mbti}-${d.b.variant||'?'} · ${MBTI_DESC[d.b.mbti]||''}</div>
+          ${enneaB.type ? `<div class="pm-ennea">✦ ${enneaSummary(d.b)} — ${ENNEA_TYPES[enneaB.type]||''}</div>` : ''}
           <div class="pm-desc">${d.b.notes || ''}</div>
           <div class="pm-rarity">~${RARITY[d.b.mbti]||'?'}% of population</div>
         </div>
       </div>
-      <div class="compat-hero">
-        <div class="compat-num" style="color:${col}">${sc}</div>
-        <div class="compat-label">% COMPATIBILITY</div>
+      <div class="compat-row">
+        <div>
+          <div class="compat-hero">
+            <div class="compat-num" style="color:${col}">${sc}</div>
+            <div class="compat-label">% MBTI COMPAT</div>
+          </div>
+        </div>
+        ${enneaScoreHtml}
       </div>
       <div class="bar-group">
         ${traits.map(t => `
@@ -919,20 +1200,16 @@ async function doCompare() {
       </div>
       <div class="card-title">AI Analysis</div>
       <div class="analysis-block">${d.analysis}</div>
+      ${hasEnnea ? `<div style="margin-top:16px"><button class="btn-ennea" style="font-size:10px;padding:7px 16px;" onclick="goEnneaCompare('${d.a.name}','${d.b.name}')">✦ Deep Enneagram Analysis →</button></div>` : ''}
     </div>
   `;
-  // animate bars
   requestAnimationFrame(() => {
-    document.querySelectorAll('.bar-fill').forEach(b => {
-      b.style.width = b.dataset.w + '%';
-    });
+    document.querySelectorAll('.bar-fill').forEach(b => { b.style.width = b.dataset.w + '%'; });
   });
 }
 
 function quickCompare(a, b) {
-  document.querySelectorAll('.nav-tab').forEach((btn,i) => {
-    btn.classList.toggle('active', i===1);
-  });
+  document.querySelectorAll('.nav-tab').forEach((btn,i) => { btn.classList.toggle('active', i===1); });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-compare').classList.add('active');
   populateSelects();
@@ -941,7 +1218,7 @@ function quickCompare(a, b) {
   doCompare();
 }
 
-// ── Group ─────────────────────────────────────────────────────────────────────
+// ── MBTI Group ────────────────────────────────────────────────────────────────
 async function doGroup() {
   if (friends.length < 2) {
     document.getElementById('group-result').innerHTML = '<div class="msg-err">need at least 2 profiles</div>';
@@ -972,14 +1249,13 @@ async function doGroup() {
 
 // ── Chemistry Map 3D ──────────────────────────────────────────────────────────
 let chemAnimFrame = null;
-let chemScene = null; // holds cleanup ref
+let chemScene = null;
 
 async function loadChemistry() {
   const wrap    = document.getElementById('chem-canvas-wrap');
   const statsEl = document.getElementById('chem-stats');
   const tooltip = document.getElementById('chem-tooltip');
 
-  // Kill previous scene
   if (chemAnimFrame) { cancelAnimationFrame(chemAnimFrame); chemAnimFrame = null; }
   if (chemScene && chemScene.dispose) chemScene.dispose();
   tooltip.style.display = 'none';
@@ -999,129 +1275,83 @@ async function loadChemistry() {
   const nodesData = data.nodes;
   const edgesData = data.edges;
 
-  // ── Stats bar ──
-  const avg  = Math.round(edgesData.reduce((s,e)=>s+e.score,0)/edgesData.length);
-  const best = edgesData.reduce((b,e)=>e.score>b.score?e:b, edgesData[0]);
-  statsEl.style.display = 'grid';
-  statsEl.innerHTML = `
-    <div class="stat-box"><div class="stat-num">${nodesData.length}</div><div class="stat-label">Profiles</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:${scoreColor(avg)}">${avg}%</div><div class="stat-label">Group Avg</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--green);font-size:18px">${best.a} × ${best.b}</div><div class="stat-label">Best Match · ${best.score}%</div></div>
-  `;
-
-  // ── Three.js setup ──
-  const THREE = window.THREE;
-  const cvs   = document.getElementById('chem-canvas');
-  const W = wrap.offsetWidth || 800;
-  const H = wrap.offsetHeight || 480;
+  const W = wrap.offsetWidth, H = wrap.offsetHeight;
+  const cvs = document.getElementById('chem-canvas');
+  cvs.style.display = 'block';
+  cvs.width = W; cvs.height = H;
 
   const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(W, H);
+  renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setClearColor(0x000000, 0);
 
   const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 1000);
-  camera.position.set(0, 0, 220);
+  const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 2000);
+  camera.position.z = 220;
 
-  // Ambient + point lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-  const ptLight = new THREE.PointLight(0x00e5ff, 1.2, 400);
-  ptLight.position.set(0, 80, 100);
-  scene.add(ptLight);
-  const ptLight2 = new THREE.PointLight(0x7c4dff, 0.8, 300);
-  ptLight2.position.set(-80, -60, 80);
-  scene.add(ptLight2);
+  scene.add(new THREE.AmbientLight(0x223355, 1.5));
+  const dLight = new THREE.DirectionalLight(0x00e5ff, 1.2);
+  dLight.position.set(100, 100, 100);
+  scene.add(dLight);
 
-  // ── Compute avg compat per node (determines size) ──
-  const nodeAvgCompat = {};
-  nodesData.forEach(n => {
-    const related = edgesData.filter(e => e.a===n.id || e.b===n.id);
-    nodeAvgCompat[n.id] = related.length
-      ? Math.round(related.reduce((s,e)=>s+e.score,0)/related.length)
-      : 50;
-  });
-
-  // ── Position nodes on a sphere surface ──
-  const N = nodesData.length;
-  const SPHERE_R = 70;
+  // Golden-angle node placement
   const nodeObjs = {};
+  const phi = Math.PI * (3 - Math.sqrt(5));
+  const n = nodesData.length;
 
-  // Golden angle spiral for even distribution on sphere
-  nodesData.forEach((n, i) => {
-    const phi   = Math.acos(1 - 2*(i+0.5)/N);
-    const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-    n.pos = new THREE.Vector3(
-      SPHERE_R * Math.sin(phi) * Math.cos(theta),
-      SPHERE_R * Math.sin(phi) * Math.sin(theta),
-      SPHERE_R * Math.cos(phi)
-    );
+  nodesData.forEach((nd, i) => {
+    const related = edgesData.filter(e => e.a === nd.id || e.b === nd.id);
+    const avg = related.length ? Math.round(related.reduce((s,e) => s+e.score,0)/related.length) : 50;
+    nd.avgCompat = avg;
 
-    // Node size = 4–14 based on avg compat
-    const avgC = nodeAvgCompat[n.id];
-    const radius = 4 + (avgC/100) * 10;
+    const r = 4 + (avg/100) * 8;
+    const y = 1 - (i / (n-1)) * 2;
+    const radius = Math.sqrt(1 - y*y);
+    const theta  = phi * i;
+    const spread = 90;
+    const pos = new THREE.Vector3(Math.cos(theta)*radius*spread, y*spread, Math.sin(theta)*radius*spread);
 
-    // Sphere geometry
-    const geo  = new THREE.SphereGeometry(radius, 32, 32);
-    const mat  = new THREE.MeshPhongMaterial({
-      color: 0x0a1020,
-      emissive: 0x00e5ff,
-      emissiveIntensity: 0.12,
-      shininess: 80,
-      transparent: true,
-      opacity: 0.92,
+    const geo  = new THREE.SphereGeometry(r, 24, 24);
+    const mat  = new THREE.MeshStandardMaterial({
+      color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 0.12,
+      roughness: 0.3, metalness: 0.6
     });
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.copy(n.pos);
-    mesh.userData = { nodeId: n.id, mbti: n.mbti, variant: n.variant, avgCompat: avgC, baseRadius: radius };
+    mesh.position.copy(pos);
+    mesh.userData = { nodeId: nd.id, mbti: nd.mbti, variant: nd.variant, avgCompat: avg };
     scene.add(mesh);
+    nodeObjs[nd.id] = mesh;
 
-    // Wireframe ring around sphere
-    const ringGeo = new THREE.TorusGeometry(radius + 1.5, 0.3, 8, 48);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.35 });
+    // Ring
+    const ringGeo = new THREE.TorusGeometry(r + 2, 0.4, 8, 32);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.25 });
     const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.random() * Math.PI;
-    ring.rotation.y = Math.random() * Math.PI;
     mesh.add(ring);
     mesh.userData.ring = ring;
 
     // Glow sprite
-    const spriteMat = new THREE.SpriteMaterial({
-      map: makeGlowTexture(),
-      color: 0x00e5ff,
-      transparent: true,
-      opacity: 0.18,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    const sprite = new THREE.Sprite(spriteMat);
-    const glowSize = radius * 5;
-    sprite.scale.set(glowSize, glowSize, 1);
-    mesh.add(sprite);
-    mesh.userData.glow = sprite;
+    const glowTex = makeGlowTexture();
+    const glowMat = new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false });
+    const glow = new THREE.Sprite(glowMat);
+    glow.scale.set(r*5, r*5, 1);
+    glow.material.opacity = 0.15;
+    mesh.add(glow);
+    mesh.userData.glow = glow;
 
-    nodeObjs[n.id] = mesh;
-  });
-
-  // ── Labels (canvas textures) ──
-  nodesData.forEach(n => {
-    const mesh = nodeObjs[n.id];
-    const r    = mesh.userData.baseRadius;
-
-    const lCanvas = document.createElement('canvas');
-    lCanvas.width  = 256; lCanvas.height = 64;
-    const lCtx = lCanvas.getContext('2d');
-    lCtx.fillStyle = 'rgba(0,0,0,0)';
-    lCtx.fillRect(0,0,256,64);
-    lCtx.font = '600 22px IBM Plex Mono, monospace';
-    lCtx.fillStyle = '#e8edf8';
-    lCtx.textAlign = 'center';
-    lCtx.fillText(n.id, 128, 26);
-    lCtx.font = '400 16px IBM Plex Mono, monospace';
-    lCtx.fillStyle = 'rgba(0,229,255,0.8)';
-    lCtx.fillText(n.mbti + (n.variant?'-'+n.variant:''), 128, 50);
-
-    const tex = new THREE.CanvasTexture(lCanvas);
+    // Label
+    const lc = document.createElement('canvas');
+    lc.width = 256; lc.height = 64;
+    const lx = lc.getContext('2d');
+    lx.fillStyle = 'rgba(0,0,0,0)';
+    lx.fillRect(0,0,256,64);
+    lx.font = 'bold 22px IBM Plex Mono, monospace';
+    lx.fillStyle = '#e8edf8';
+    lx.textAlign = 'center';
+    lx.fillText(nd.id, 128, 26);
+    lx.font = '16px IBM Plex Mono, monospace';
+    lx.fillStyle = '#00e5ff';
+    lx.fillText(nd.mbti + (nd.ennea_type ? ' · E'+nd.ennea_type : ''), 128, 48);
+    const tex = new THREE.CanvasTexture(lc);
     const lMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
     const label = new THREE.Sprite(lMat);
     label.scale.set(30, 7.5, 1);
@@ -1130,20 +1360,18 @@ async function loadChemistry() {
     mesh.userData.label = label;
   });
 
-  // ── Edges as tubes ──
+  // Edges
   const edgeMeshes = [];
   edgesData.forEach(e => {
     const na = nodeObjs[e.a], nb = nodeObjs[e.b];
     if (!na || !nb) return;
-
     const col = e.score>=75 ? 0x00e676 : e.score>=50 ? 0xffd740 : 0xff4d6d;
     const alpha = 0.15 + (e.score/100) * 0.45;
     const tubeR = 0.25 + (e.score/100) * 0.6;
-
-    const pts  = [na.position.clone(), nb.position.clone()];
-    const curve= new THREE.CatmullRomCurve3(pts);
-    const geo  = new THREE.TubeGeometry(curve, 8, tubeR, 5, false);
-    const mat  = new THREE.MeshBasicMaterial({
+    const pts   = [na.position.clone(), nb.position.clone()];
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const geo   = new THREE.TubeGeometry(curve, 8, tubeR, 5, false);
+    const mat   = new THREE.MeshBasicMaterial({
       color: col, transparent: true, opacity: alpha,
       blending: THREE.AdditiveBlending, depthWrite: false,
     });
@@ -1153,54 +1381,46 @@ async function loadChemistry() {
     edgeMeshes.push(tube);
   });
 
-  // ── Raycasting for hover/click ──
+  // Raycasting
   const raycaster = new THREE.Raycaster();
   const mouse2D   = new THREE.Vector2(-9999, -9999);
   let hoveredMesh = null, hoveredEdgeMesh = null;
 
-  // ── Orbit controls (manual) ──
+  // Orbit
   let isDragging = false, autoRotate = true;
   let lastX = 0, lastY = 0;
-  let rotX = 0, rotY = 0;       // current euler angles of the pivot
-  let velX = 0, velY = 0;       // inertia
+  let rotX = 0, rotY = 0;
+  let velX = 0, velY = 0;
   let autoResumeTimer = null;
   let camDist = 220;
 
   const pivot = new THREE.Group();
   scene.add(pivot);
-  // Move all node/edge objects under pivot
   nodesData.forEach(n => { pivot.add(nodeObjs[n.id]); });
   edgeMeshes.forEach(m => { pivot.add(m); });
-  // Also move lights? No — keep lights in world space for consistent illumination
 
   cvs.addEventListener('mousedown', e => {
     isDragging = true; autoRotate = false;
     lastX = e.clientX; lastY = e.clientY;
     clearTimeout(autoResumeTimer);
   });
-
   window.addEventListener('mouseup', () => {
     if (!isDragging) return;
     isDragging = false;
     autoResumeTimer = setTimeout(() => { autoRotate = true; }, 2000);
   });
-
   window.addEventListener('mousemove', ev => {
     if (isDragging) {
       const sens = parseFloat(document.getElementById('chem-sens')?.value || 2.5);
       const factor = (sens / 2.5) * 0.022;
-      const dx = ev.clientX - lastX;
-      const dy = ev.clientY - lastY;
-      velY += dx * factor;
-      velX += dy * factor;
+      velY += (ev.clientX - lastX) * factor;
+      velX += (ev.clientY - lastY) * factor;
       lastX = ev.clientX; lastY = ev.clientY;
     }
-    // Mouse position for raycasting
     const rect = cvs.getBoundingClientRect();
     mouse2D.x =  ((ev.clientX - rect.left) / rect.width)  * 2 - 1;
     mouse2D.y = -((ev.clientY - rect.top)  / rect.height) * 2 + 1;
   });
-
   cvs.addEventListener('wheel', ev => {
     ev.preventDefault();
     camDist = Math.max(60, Math.min(400, camDist + ev.deltaY * 0.3));
@@ -1220,47 +1440,33 @@ async function loadChemistry() {
     }
   });
 
-  // Expose zoom/reset to buttons
   window.chemZoom  = factor => { camDist = Math.max(60, Math.min(400, camDist * (1/factor))); };
   window.chemReset = () => { camDist = 220; velX=0; velY=0; rotX=0; rotY=0; pivot.rotation.set(0,0,0); };
 
-  // Glow texture helper
   function makeGlowTexture() {
-    const s = 64;
-    const c = document.createElement('canvas');
+    const s = 64, c = document.createElement('canvas');
     c.width = c.height = s;
     const cx = c.getContext('2d');
     const grd = cx.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
-    grd.addColorStop(0,   'rgba(0,229,255,1)');
-    grd.addColorStop(0.3, 'rgba(0,229,255,0.4)');
-    grd.addColorStop(1,   'rgba(0,229,255,0)');
-    cx.fillStyle = grd;
-    cx.fillRect(0,0,s,s);
+    grd.addColorStop(0,'rgba(0,229,255,1)');
+    grd.addColorStop(0.3,'rgba(0,229,255,0.4)');
+    grd.addColorStop(1,'rgba(0,229,255,0)');
+    cx.fillStyle = grd; cx.fillRect(0,0,s,s);
     return new THREE.CanvasTexture(c);
   }
 
-  // ── Animate ──
   let t = 0;
   function animate() {
     chemAnimFrame = requestAnimationFrame(animate);
     t += 0.016;
-
-    // Auto-rotate
-    if (autoRotate) {
-      velY += 0.003;
-    }
-    // Inertia damping
+    if (autoRotate) velY += 0.003;
     velX *= 0.88; velY *= 0.88;
     rotX += velX; rotY += velY;
-
     pivot.rotation.x = rotX;
     pivot.rotation.y = rotY;
-
-    // Camera zoom
     camera.position.z += (camDist - camera.position.z) * 0.08;
     camera.updateProjectionMatrix();
 
-    // Pulse nodes
     nodesData.forEach(n => {
       const mesh = nodeObjs[n.id];
       if (!mesh) return;
@@ -1269,25 +1475,20 @@ async function loadChemistry() {
       mesh.userData.ring.rotation.x += 0.005;
       mesh.userData.glow.material.opacity = 0.15 + pulse + (hoveredMesh===mesh ? 0.25 : 0);
       mesh.material.emissiveIntensity = 0.12 + pulse * 2 + (hoveredMesh===mesh ? 0.4 : 0);
-      // Labels always face camera
       mesh.userData.label.quaternion.copy(camera.quaternion);
     });
 
-    // Pulse edges
     edgeMeshes.forEach(m => {
       const isHov = m === hoveredEdgeMesh || (hoveredMesh && (m.userData.edgeData.a===hoveredMesh.userData.nodeId||m.userData.edgeData.b===hoveredMesh.userData.nodeId));
       m.material.opacity = isHov ? Math.min(1, m.userData.baseOpacity * 3) : m.userData.baseOpacity;
-      m.material.linewidth = isHov ? 3 : 1;
     });
 
-    // Raycasting
     raycaster.setFromCamera(mouse2D, camera);
     const nodeMeshes = nodesData.map(n=>nodeObjs[n.id]).filter(Boolean);
     const intersectsNodes = raycaster.intersectObjects(nodeMeshes);
     const prevHovered = hoveredMesh;
     hoveredMesh = intersectsNodes.length ? intersectsNodes[0].object : null;
 
-    // Edge hover (only if no node hovered)
     if (!hoveredMesh) {
       const intersectsEdges = raycaster.intersectObjects(edgeMeshes);
       hoveredEdgeMesh = intersectsEdges.length ? intersectsEdges[0].object : null;
@@ -1295,20 +1496,17 @@ async function loadChemistry() {
       hoveredEdgeMesh = null;
     }
 
-    // Tooltip
     const tip = document.getElementById('chem-tooltip');
     if (hoveredMesh) {
       const nd = hoveredMesh.userData;
       const rect = cvs.getBoundingClientRect();
-      // project to screen
       const pos3 = hoveredMesh.position.clone();
       pivot.localToWorld(pos3);
       pos3.project(camera);
       const sx = (pos3.x*0.5+0.5)*rect.width;
       const sy = (-pos3.y*0.5+0.5)*rect.height;
       tip.style.display = 'block';
-      tip.style.left = (sx+20)+'px';
-      tip.style.top  = (sy-10)+'px';
+      tip.style.left = (sx+20)+'px'; tip.style.top = (sy-10)+'px';
       tip.innerHTML  = `<strong style="color:var(--accent)">${nd.nodeId}</strong> · ${nd.mbti}${nd.variant?'-'+nd.variant:''}<br><span style="color:var(--text-dim)">avg compat: </span><span style="color:${scoreColor(nd.avgCompat)}">${nd.avgCompat}%</span>`;
       cvs.style.cursor = 'pointer';
     } else if (hoveredEdgeMesh) {
@@ -1316,13 +1514,11 @@ async function loadChemistry() {
       const rect = cvs.getBoundingClientRect();
       const na = nodeObjs[ed.a], nb = nodeObjs[ed.b];
       const mid = new THREE.Vector3().addVectors(na.position, nb.position).multiplyScalar(0.5);
-      pivot.localToWorld(mid);
-      mid.project(camera);
+      pivot.localToWorld(mid); mid.project(camera);
       const sx = (mid.x*0.5+0.5)*rect.width;
       const sy = (-mid.y*0.5+0.5)*rect.height;
       tip.style.display = 'block';
-      tip.style.left = (sx+12)+'px';
-      tip.style.top  = (sy-10)+'px';
+      tip.style.left = (sx+12)+'px'; tip.style.top = (sy-10)+'px';
       tip.innerHTML  = `<strong style="color:${scoreColor(ed.score)}">${ed.score}%</strong> &nbsp;${ed.a} × ${ed.b}`;
       cvs.style.cursor = 'pointer';
     } else {
@@ -1333,7 +1529,6 @@ async function loadChemistry() {
     renderer.render(scene, camera);
   }
 
-  // Handle resize
   window.addEventListener('resize', () => {
     const W2 = wrap.offsetWidth, H2 = wrap.offsetHeight;
     renderer.setSize(W2, H2);
@@ -1341,15 +1536,9 @@ async function loadChemistry() {
     camera.updateProjectionMatrix();
   });
 
-  // Expose dispose
-  chemScene = { dispose: () => {
-    renderer.dispose();
-    scene.clear();
-  }};
-
+  chemScene = { dispose: () => { renderer.dispose(); scene.clear(); } };
   animate();
 }
-
 
 // ── Suggest ───────────────────────────────────────────────────────────────────
 function populateSuggestChips() {
@@ -1378,6 +1567,287 @@ async function doSuggest() {
       <div class="analysis-block">${d.analysis}</div>
     </div>
   `;
+}
+
+// ── Enneagram Panel ───────────────────────────────────────────────────────────
+
+function populateEnneaSelects() {
+  ['ecmp-a','ecmp-b'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = friends.map(f => {
+      const ea = f.enneagram || {};
+      const tag = ea.type ? ` [E${ea.type}]` : ' [no ennea]';
+      return `<option value="${f.name}">${f.name} (${f.mbti})${tag}</option>`;
+    }).join('');
+  });
+}
+
+function goEnneaCompare(a, b) {
+  document.querySelectorAll('.nav-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', false);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-enneagram').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    if (btn.textContent.includes('Enneagram')) btn.classList.add('active');
+  });
+  // Set compare sub-tab
+  showEnneaTab('compare', document.querySelector('.sub-tab'));
+  populateEnneaSelects();
+  document.getElementById('ecmp-a').value = a;
+  document.getElementById('ecmp-b').value = b;
+  doEnneaCompare();
+}
+
+async function doEnneaCompare() {
+  const a = document.getElementById('ecmp-a').value;
+  const b = document.getElementById('ecmp-b').value;
+  if (a === b) {
+    document.getElementById('ennea-compare-result').innerHTML = '<div class="msg-err">select two different people</div>';
+    return;
+  }
+
+  document.getElementById('ennea-compare-result').innerHTML = '<div class="loading">// analyzing enneagram dynamics...</div>';
+
+  const res = await fetch('/api/enneagram/compare', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({a, b})
+  });
+  const d = await res.json();
+
+  if (d.error) {
+    document.getElementById('ennea-compare-result').innerHTML = `<div class="msg-err">${d.error}</div>`;
+    return;
+  }
+
+  const col = scoreColor(d.compat);
+  const ea  = d.a.enneagram || {};
+  const eb  = d.b.enneagram || {};
+
+  // Build arrow badges
+  const arrowBadges = [];
+  if (d.is_growth_ab) arrowBadges.push(`<div class="arrow-badge arrow-growth">↗ ${d.a.name} integrates toward Type ${d.tb}</div>`);
+  if (d.is_growth_ba) arrowBadges.push(`<div class="arrow-badge arrow-growth">↗ ${d.b.name} integrates toward Type ${d.ta}</div>`);
+  if (d.is_stress_ab) arrowBadges.push(`<div class="arrow-badge arrow-stress">↘ ${d.a.name} disintegrates toward Type ${d.tb}</div>`);
+  if (d.is_stress_ba) arrowBadges.push(`<div class="arrow-badge arrow-stress">↘ ${d.b.name} disintegrates toward Type ${d.ta}</div>`);
+  if (!arrowBadges.length) arrowBadges.push(`<div class="arrow-badge arrow-none">No direct arrow connection</div>`);
+
+  // Growth/stress of each person (for diagram labels)
+  const diagramSvg = buildEnneaDiagram(d.ta, d.tb, d.growth_of_a, d.stress_of_a, d.growth_of_b, d.stress_of_b);
+
+  document.getElementById('ennea-compare-result').innerHTML = `
+    <div class="card" style="border-color:rgba(255,145,0,0.2)">
+      <div class="profile-pair">
+        <div class="profile-mini" style="border-color:rgba(255,145,0,0.2)">
+          <div class="pm-name">${d.a.name}</div>
+          <div class="pm-type">${d.a.mbti}-${d.a.variant||'?'}</div>
+          <div class="pm-ennea">✦ Type ${d.ta} — ${ENNEA_TYPES[d.ta]||''}
+            ${centerBadgeHTML(d.center_a)}
+          </div>
+          ${ea.wing ? `<div style="font-size:10px;color:var(--text-dim);margin-top:4px">Wing ${ea.wing} · Instinct ${ea.instinct||'?'}</div>` : ''}
+          ${ea.tritype ? `<div style="font-size:9px;color:var(--text-dim);margin-top:2px">Tritype ${ea.tritype}</div>` : ''}
+        </div>
+        <div class="profile-mini" style="border-color:rgba(255,145,0,0.2)">
+          <div class="pm-name">${d.b.name}</div>
+          <div class="pm-type">${d.b.mbti}-${d.b.variant||'?'}</div>
+          <div class="pm-ennea">✦ Type ${d.tb} — ${ENNEA_TYPES[d.tb]||''}
+            ${centerBadgeHTML(d.center_b)}
+          </div>
+          ${eb.wing ? `<div style="font-size:10px;color:var(--text-dim);margin-top:4px">Wing ${eb.wing} · Instinct ${eb.instinct||'?'}</div>` : ''}
+          ${eb.tritype ? `<div style="font-size:9px;color:var(--text-dim);margin-top:2px">Tritype ${eb.tritype}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="compat-row">
+        <div class="compat-hero">
+          <div class="compat-num" style="color:${col}">${d.compat}</div>
+          <div class="compat-label">✦ ENNEAGRAM COMPAT%</div>
+        </div>
+      </div>
+
+      <div class="ennea-diagram-wrap">
+        ${diagramSvg}
+        <div class="ennea-diagram-info">
+          <div>
+            <div style="font-size:9px;letter-spacing:0.14em;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Arrow Dynamics</div>
+            ${arrowBadges.join('')}
+          </div>
+          <div>
+            <div style="font-size:9px;letter-spacing:0.14em;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Growth Directions</div>
+            <div style="font-size:10px;color:var(--text-dim);line-height:1.8;">
+              ${d.a.name} grows toward Type ${d.growth_of_a} (${ENNEA_TYPES[d.growth_of_a]||''})<br>
+              ${d.b.name} grows toward Type ${d.growth_of_b} (${ENNEA_TYPES[d.growth_of_b]||''})<br>
+              ${d.a.name} stresses toward Type ${d.stress_of_a} (${ENNEA_TYPES[d.stress_of_a]||''})<br>
+              ${d.b.name} stresses toward Type ${d.stress_of_b} (${ENNEA_TYPES[d.stress_of_b]||''})
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-title ennea">AI Enneagram Analysis</div>
+      <div class="analysis-block ennea">${d.analysis}</div>
+    </div>
+  `;
+}
+
+async function doEnneaGroup() {
+  document.getElementById('ennea-group-result').innerHTML = '<div class="loading">// analyzing enneagram group dynamics...</div>';
+
+  const res = await fetch('/api/enneagram/group');
+  const d = await res.json();
+
+  if (d.error) {
+    document.getElementById('ennea-group-result').innerHTML = `<div class="msg-err">${d.error}</div>`;
+    return;
+  }
+
+  const total = Object.values(d.centers).reduce((s,v) => s + v.length, 0);
+  const pct = c => total ? Math.round((d.centers[c]||[]).length / total * 100) : 0;
+
+  const centerDistHtml = `
+    <div class="center-dist">
+      <div class="center-seg center-gut-seg"   style="width:${pct('gut')}%"></div>
+      <div class="center-seg center-heart-seg" style="width:${pct('heart')}%"></div>
+      <div class="center-seg center-head-seg"  style="width:${pct('head')}%"></div>
+    </div>
+    <div style="display:flex;gap:16px;font-size:9px;color:var(--text-dim);letter-spacing:0.08em;margin-top:4px;">
+      <span style="color:var(--orange)">▮ Gut ${pct('gut')}% — ${(d.centers.gut||[]).join(', ')||'none'}</span>
+      <span style="color:var(--accent3)">▮ Heart ${pct('heart')}% — ${(d.centers.heart||[]).join(', ')||'none'}</span>
+      <span style="color:var(--accent)">▮ Head ${pct('head')}% — ${(d.centers.head||[]).join(', ')||'none'}</span>
+    </div>
+  `;
+
+  document.getElementById('ennea-group-result').innerHTML = `
+    <div class="card" style="border-color:rgba(255,145,0,0.2)">
+      <div class="card-title ennea">Center Distribution</div>
+      ${centerDistHtml}
+    </div>
+    <div class="card" style="border-color:rgba(255,145,0,0.2)">
+      <div class="card-title ennea">Pairwise Enneagram Compatibility</div>
+      <div class="pairs-grid">
+        ${d.pairs.map(p => `
+          <div class="pair-chip" onclick="goEnneaCompare('${p.a}','${p.b}')" style="border-color:rgba(255,145,0,0.15)">
+            <div class="pair-names" style="font-size:10px;">${p.a} (${p.ta}) × ${p.b} (${p.tb})</div>
+            <div class="pair-score" style="color:${scoreColor(p.score)}">${p.score}<span>%</span></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(255,145,0,0.2)">
+      <div class="card-title ennea">Enneagram Group Analysis</div>
+      <div class="analysis-block ennea">${d.analysis}</div>
+    </div>
+  `;
+}
+
+// ── Enneagram diagram SVG ─────────────────────────────────────────────────────
+function buildEnneaDiagram(ta, tb, growA, stressA, growB, stressB) {
+  const W = 240, H = 240;
+  const cx = 120, cy = 120, r = 95, nr = 14;
+
+  // Compute positions
+  function pos(t) {
+    const i = [9,1,2,3,4,5,6,7,8].indexOf(t);
+    const angle = (-90 + i * 40) * Math.PI / 180;
+    return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+  }
+
+  // Draw inner lines (lightly)
+  const innerLines = [
+    [1,4],[4,2],[2,8],[8,5],[5,7],[7,1],
+    [3,6],[6,9],[9,3]
+  ];
+
+  const linesSvg = innerLines.map(([a, b]) => {
+    const pa = pos(a), pb = pos(b);
+    return `<line x1="${pa.x.toFixed(1)}" y1="${pa.y.toFixed(1)}" x2="${pb.x.toFixed(1)}" y2="${pb.y.toFixed(1)}"
+      stroke="rgba(42,52,80,0.8)" stroke-width="1"/>`;
+  }).join('');
+
+  // Draw circle
+  const circleSvg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(31,39,64,0.8)" stroke-width="1"/>`;
+
+  // Arrow helpers
+  function arrowHead(fx, fy, tx, ty, color) {
+    const dx = tx - fx, dy = ty - fy;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const ux = dx/len, uy = dy/len;
+    const nx = -uy, ny = ux;
+    const tip_x = tx - ux*nr, tip_y = ty - uy*nr;
+    const ax = tip_x - ux*8 + nx*4;
+    const ay = tip_y - uy*8 + ny*4;
+    const bx = tip_x - ux*8 - nx*4;
+    const by = tip_y - uy*8 - ny*4;
+    return `<polygon points="${tip_x.toFixed(1)},${tip_y.toFixed(1)} ${ax.toFixed(1)},${ay.toFixed(1)} ${bx.toFixed(1)},${by.toFixed(1)}" fill="${color}"/>`;
+  }
+
+  function arrowLine(from, to, color, dashed=false) {
+    const pf = pos(from), pt = pos(to);
+    const dx = pt.x - pf.x, dy = pt.y - pf.y;
+    const len = Math.sqrt(dx*dx+dy*dy);
+    const ux = dx/len, uy = dy/len;
+    const sx = pf.x + ux*nr, sy = pf.y + uy*nr;
+    const ex = pt.x - ux*(nr+2), ey = pt.y - uy*(nr+2);
+    const dash = dashed ? 'stroke-dasharray="5,3"' : '';
+    return `<line x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}"
+      stroke="${color}" stroke-width="1.5" ${dash} opacity="0.85"/>` +
+      arrowHead(sx, sy, pt.x, pt.y, color);
+  }
+
+  // Growth and stress arrows for the two selected types
+  const arrowsSvg = [];
+  if (growA) arrowsSvg.push(arrowLine(ta, growA, '#00e676'));
+  if (stressA) arrowsSvg.push(arrowLine(ta, stressA, '#ff4d6d', true));
+  if (growB) arrowsSvg.push(arrowLine(tb, growB, '#00e676'));
+  if (stressB) arrowsSvg.push(arrowLine(tb, stressB, '#ff4d6d', true));
+
+  // All nodes
+  const nodesSvg = [1,2,3,4,5,6,7,8,9].map(t => {
+    const p = pos(t);
+    const isA = t === ta, isB = t === tb;
+    const isGrowA = t === growA, isStressA = t === stressA;
+    const isGrowB = t === growB, isStressB = t === stressB;
+
+    let fill = 'var(--bg3)', stroke = 'rgba(42,52,80,0.9)', textCol = '#44536e';
+    let r2 = 12, strokeW = 1;
+
+    if (isA || isB) {
+      fill = isA ? '#ff9100' : '#7c4dff';
+      stroke = fill; textCol = '#fff';
+      r2 = 15; strokeW = 2;
+    } else if (isGrowA || isGrowB) {
+      fill = 'rgba(0,230,118,0.15)'; stroke = '#00e676'; textCol = '#00e676';
+      r2 = 13; strokeW = 1.5;
+    } else if (isStressA || isStressB) {
+      fill = 'rgba(255,77,109,0.12)'; stroke = '#ff4d6d'; textCol = '#ff4d6d';
+      r2 = 13; strokeW = 1.5;
+    }
+
+    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${r2}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>
+      <text x="${p.x.toFixed(1)}" y="${(p.y+4).toFixed(1)}" text-anchor="middle"
+        fill="${textCol}" font-size="${isA||isB?11:9}" font-family="IBM Plex Mono,monospace" font-weight="${isA||isB?'600':'400'}">${t}</text>`;
+  }).join('');
+
+  // Legend
+  const legendSvg = `
+    <circle cx="10" cy="${H-22}" r="5" fill="#ff9100"/><text x="18" y="${H-18}" font-size="8" fill="#ff9100" font-family="IBM Plex Mono,monospace">${ta}</text>
+    <circle cx="30" cy="${H-22}" r="5" fill="#7c4dff"/><text x="38" y="${H-18}" font-size="8" fill="#7c4dff" font-family="IBM Plex Mono,monospace">${tb}</text>
+    <line x1="54" y1="${H-22}" x2="68" y2="${H-22}" stroke="#00e676" stroke-width="1.5"/><polygon points="68,${H-22} 63,${H-24} 63,${H-20}" fill="#00e676"/>
+    <text x="72" y="${H-18}" font-size="8" fill="#00e676" font-family="IBM Plex Mono,monospace">growth</text>
+    <line x1="112" y1="${H-22}" x2="126" y2="${H-22}" stroke="#ff4d6d" stroke-width="1.5" stroke-dasharray="4,2"/><polygon points="126,${H-22} 121,${H-24} 121,${H-20}" fill="#ff4d6d"/>
+    <text x="130" y="${H-18}" font-size="8" fill="#ff4d6d" font-family="IBM Plex Mono,monospace">stress</text>
+  `;
+
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"
+    xmlns="http://www.w3.org/2000/svg"
+    style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;"
+    class="ennea-diagram-svg">
+    ${circleSvg}
+    ${linesSvg}
+    ${arrowsSvg.join('')}
+    ${nodesSvg}
+    ${legendSvg}
+  </svg>`;
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
