@@ -610,6 +610,226 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
 .tag-p { background:rgba(124,77,255,0.08); color:var(--accent2); border:1px solid rgba(124,77,255,0.2); }
 .tag-r { background:rgba(255,77,109,0.08); color:var(--accent3); border:1px solid rgba(255,77,109,0.2); }
 .tag-o { background:rgba(255,145,0,0.08); color:var(--orange); border:1px solid rgba(255,145,0,0.2); }
+
+/* ── MBTI Calibration Deck ── */
+.deck-card, .triad-card { overflow:hidden; }
+
+.deck-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:4px;
+}
+
+.deck-badge {
+  font-family: var(--display);
+  font-size:20px; font-weight:700;
+  letter-spacing:0.15em;
+  color: var(--accent);
+  text-shadow: 0 0 14px rgba(0,229,255,0.4);
+  transition: all 0.2s;
+}
+
+.deck-subtitle {
+  font-size:10px; letter-spacing:0.1em;
+  color:var(--text-dim); margin-bottom:18px;
+}
+
+.deck-axes { display:flex; flex-direction:column; gap:14px; margin-bottom:18px; }
+
+.axis-row { display:flex; flex-direction:column; gap:5px; }
+
+.axis-poles {
+  display:flex; justify-content:space-between; align-items:center;
+}
+
+.axis-pole {
+  font-size:9px; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--text-dim); transition:color 0.2s;
+}
+.axis-pole.lit { color:var(--accent); }
+
+.axis-val-badge {
+  font-size:10px; font-weight:600;
+  color:var(--accent);
+  background:rgba(0,229,255,0.06);
+  border:1px solid rgba(0,229,255,0.15);
+  padding:1px 7px; border-radius:2px;
+  min-width:30px; text-align:center;
+  transition: background 0.15s;
+  font-family:var(--mono);
+}
+
+input[type=range].deck-slider {
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:2px; padding:0;
+  background: var(--border); border:none; border-radius:0;
+  outline:none; cursor:pointer;
+}
+input[type=range].deck-slider::-webkit-slider-runnable-track {
+  height:2px;
+  background: linear-gradient(to right,
+    rgba(0,229,255,0.35) 0%,
+    rgba(0,229,255,0.35) var(--pct,50%),
+    var(--border) var(--pct,50%)
+  );
+}
+input[type=range].deck-slider::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  width:11px; height:11px;
+  border-radius:50%;
+  background: var(--bg2);
+  border:2px solid var(--accent);
+  box-shadow: 0 0 7px rgba(0,229,255,0.55);
+  cursor:pointer; margin-top:-4.5px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+input[type=range].deck-slider:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 12px rgba(0,229,255,0.85);
+}
+input[type=range].deck-slider::-moz-range-thumb {
+  width:11px; height:11px; border-radius:50%;
+  background:var(--bg2); border:2px solid var(--accent); cursor:pointer;
+}
+
+/* Deck terminal */
+.deck-terminal {
+  background:#030508;
+  border:1px solid rgba(0,229,255,0.1);
+  padding:11px 14px;
+  font-family:var(--mono); font-size:10px;
+  line-height:1.75; color:#3a8c5e;
+  min-height:80px; position:relative;
+}
+.deck-terminal::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(to right,transparent,rgba(0,229,255,0.2),transparent);
+}
+.dt-line { display:flex; gap:8px; }
+.dt-prompt { color:rgba(0,229,255,0.35); flex-shrink:0; }
+.dt-warn  { color:var(--yellow); }
+.dt-err   { color:var(--accent3); }
+.dt-ok    { color:var(--green); }
+.dt-dim   { color:#243528; }
+.dt-cursor {
+  display:inline-block; width:5px; height:10px;
+  background:var(--accent); opacity:0.7;
+  animation:blink 1.1s step-end infinite;
+  vertical-align:-1px; margin-left:2px;
+}
+
+/* ── Triad Resonance Map ── */
+.triad-grid-3 {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:10px; margin-bottom:14px;
+}
+
+.t3-card {
+  border:1px solid var(--border);
+  padding:13px 11px;
+  cursor:pointer; position:relative;
+  transition:border-color 0.25s;
+  overflow:hidden; background:var(--bg3);
+}
+.t3-card::after {
+  content:''; position:absolute; inset:0;
+  opacity:0; transition:opacity 0.3s; pointer-events:none;
+}
+.t3-gut::after   { background:radial-gradient(ellipse at 50% 110%, rgba(255,145,0,0.16) 0%, transparent 65%); }
+.t3-heart::after { background:radial-gradient(ellipse at 50% 110%, rgba(255,77,109,0.16) 0%, transparent 65%); }
+.t3-head::after  { background:radial-gradient(ellipse at 50% 110%, rgba(0,229,255,0.12) 0%, transparent 65%); }
+.t3-card:hover::after, .t3-card.t3-selected::after { opacity:1; }
+
+.t3-gut.t3-selected  { border-color:rgba(255,145,0,0.45); }
+.t3-heart.t3-selected { border-color:rgba(255,77,109,0.45); }
+.t3-head.t3-selected  { border-color:rgba(0,229,255,0.35); }
+
+.t3-name {
+  font-family:var(--display); font-size:12px; font-weight:700;
+  letter-spacing:0.1em; margin-bottom:2px;
+}
+.t3-gut  .t3-name { color:var(--orange); }
+.t3-heart .t3-name { color:var(--accent3); }
+.t3-head  .t3-name { color:var(--accent); }
+
+.t3-emo {
+  font-size:8px; letter-spacing:0.14em; text-transform:uppercase;
+  margin-bottom:9px;
+}
+.t3-gut  .t3-emo { color:rgba(255,145,0,0.5); }
+.t3-heart .t3-emo { color:rgba(255,77,109,0.5); }
+.t3-head  .t3-emo { color:rgba(0,229,255,0.45); }
+
+.t3-nodes { display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap; }
+
+.t3-node {
+  width:26px; height:26px;
+  border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600;
+  color:var(--text-dim);
+  cursor:pointer; transition:all 0.18s;
+  background:var(--bg);
+}
+.t3-gut  .t3-node.t3-lit { background:rgba(255,145,0,0.1); border-color:rgba(255,145,0,0.45); color:var(--orange); }
+.t3-heart .t3-node.t3-lit { background:rgba(255,77,109,0.1); border-color:rgba(255,77,109,0.45); color:var(--accent3); }
+.t3-head  .t3-node.t3-lit { background:rgba(0,229,255,0.08); border-color:rgba(0,229,255,0.4); color:var(--accent); }
+.t3-node.t3-active { border-color:var(--accent2) !important; color:var(--accent2) !important; background:rgba(124,77,255,0.1) !important; box-shadow:0 0 8px rgba(124,77,255,0.3); }
+
+.t3-desc {
+  font-size:9px; line-height:1.6;
+  color:var(--text-dim); min-height:28px;
+  transition:color 0.2s;
+}
+.t3-card:hover .t3-desc, .t3-card.t3-selected .t3-desc { color:var(--text); }
+
+/* Vec line canvas */
+.t3-vec-wrap { height:32px; position:relative; margin:6px 0 4px; }
+.t3-vec-wrap canvas { position:absolute; top:0; left:0; }
+
+/* Staging strip */
+.staging-strip {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  background:#030508;
+  border:1px solid rgba(124,77,255,0.12);
+  padding:8px 12px;
+}
+.staging-lbl {
+  font-size:8px; letter-spacing:0.18em; text-transform:uppercase;
+  color:rgba(124,77,255,0.4); flex-shrink:0;
+}
+.staging-values { display:flex; gap:8px; flex-wrap:wrap; }
+.stag-p {
+  font-size:9px; color:var(--text-dim);
+  padding:2px 8px; border:1px solid var(--border);
+  border-radius:1px; letter-spacing:0.04em;
+  transition:all 0.25s; font-family:var(--mono);
+}
+.stag-p.stag-on {
+  color:var(--accent2); border-color:rgba(124,77,255,0.3);
+  background:rgba(124,77,255,0.05);
+}
+
+/* Wing selection chips inside staging strip */
+.t3-wing-chip {
+  cursor:pointer;
+  color:var(--text-dim);
+  background:var(--bg3);
+  border-color:var(--border2);
+  letter-spacing:0.08em;
+  transition:all 0.18s;
+  user-select:none;
+}
+.t3-wing-chip:hover {
+  color:var(--orange);
+  border-color:rgba(255,145,0,0.4);
+  background:rgba(255,145,0,0.06);
+}
+.t3-wing-chip.on {
+  color:var(--orange);
+  border-color:rgba(255,145,0,0.55);
+  background:rgba(255,145,0,0.1);
+  box-shadow:0 0 8px rgba(255,145,0,0.2);
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -671,9 +891,10 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
     <div class="panel active" id="panel-add">
       <div class="panel-header">
         <div class="panel-title">Add Profile</div>
-        <div class="panel-sub">enter personality data</div>
+        <div class="panel-sub">personality calibration interface</div>
       </div>
 
+      <!-- Identity card -->
       <div class="card">
         <div class="card-title">Identity</div>
         <div class="form-grid">
@@ -682,8 +903,15 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
             <input type="text" id="f-name" placeholder="Zara">
           </div>
           <div class="fgroup">
-            <label>MBTI Type</label>
-            <select id="f-mbti" onchange="updateTraitLabels()">
+            <label>Notes (optional)</label>
+            <input type="text" id="f-notes" placeholder="close friend, batchmate...">
+          </div>
+        </div>
+        <!-- MBTI type + variant hidden but still present for addFriend() -->
+        <div class="form-grid" style="margin-bottom:0">
+          <div class="fgroup">
+            <label>MBTI Type <span style="color:var(--accent);font-size:9px;letter-spacing:0.1em;" id="mbti-live-badge">—</span></label>
+            <select id="f-mbti" onchange="updateTraitLabels(); syncDeckFromSelects();">
               {% for t in mbti_types %}
               <option value="{{ t }}">{{ t }}</option>
               {% endfor %}
@@ -691,88 +919,84 @@ input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); }
           </div>
           <div class="fgroup">
             <label>Variant</label>
-            <select id="f-variant" onchange="updateTraitLabels()">
+            <select id="f-variant" onchange="updateTraitLabels(); syncDeckFromSelects();">
               <option value="A">Assertive (A)</option>
               <option value="T">Turbulent (T)</option>
             </select>
           </div>
-          <div class="fgroup">
-            <label>Notes (optional)</label>
-            <input type="text" id="f-notes" placeholder="close friend, batchmate...">
-          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Trait Scores</div>
-        <div class="traits-grid">
-          <div class="trait-row">
-            <span class="t-label" id="lb-introverted">Introverted %</span>
-            <input type="range" min="0" max="100" value="50" id="t-introverted" oninput="tv('introverted',this.value)">
-            <span class="t-val" id="v-introverted">50</span>
-          </div>
-          <div class="trait-row">
-            <span class="t-label" id="lb-intuitive">Intuitive %</span>
-            <input type="range" min="0" max="100" value="50" id="t-intuitive" oninput="tv('intuitive',this.value)">
-            <span class="t-val" id="v-intuitive">50</span>
-          </div>
-          <div class="trait-row">
-            <span class="t-label" id="lb-thinking">Thinking %</span>
-            <input type="range" min="0" max="100" value="50" id="t-thinking" oninput="tv('thinking',this.value)">
-            <span class="t-val" id="v-thinking">50</span>
-          </div>
-          <div class="trait-row">
-            <span class="t-label" id="lb-judging">Judging %</span>
-            <input type="range" min="0" max="100" value="50" id="t-judging" oninput="tv('judging',this.value)">
-            <span class="t-val" id="v-judging">50</span>
-          </div>
-          <div class="trait-row">
-            <span class="t-label" id="lb-assertive">Assertive %</span>
-            <input type="range" min="0" max="100" value="50" id="t-assertive" oninput="tv('assertive',this.value)">
-            <span class="t-val" id="v-assertive">50</span>
-          </div>
+      <!-- ── MBTI CALIBRATION DECK ── -->
+      <div class="card deck-card" id="deckCard">
+        <div class="deck-header">
+          <div class="card-title" style="margin-bottom:0">MBTI Calibration Deck</div>
+          <div class="deck-badge" id="deckBadge">—</div>
+        </div>
+        <div class="deck-subtitle">Adjust axes · terminal reads trait bias in real time</div>
+
+        <div class="deck-axes" id="deckAxes">
+          <!-- axes injected by JS -->
+        </div>
+
+        <div class="deck-terminal" id="deckTerminal">
+          <div class="dt-line"><span class="dt-prompt">▶</span><span class="dt-dim">awaiting calibration input...</span></div>
         </div>
       </div>
 
-      <!-- Enneagram card -->
-      <div class="card" style="border-color:rgba(255,145,0,0.2)">
-        <div class="card-title ennea">Enneagram <span style="font-weight:400;font-size:10px;color:var(--text-dim);margin-left:8px;letter-spacing:0.05em;font-family:var(--mono);">(optional)</span></div>
-        <div class="form-grid">
-          <div class="fgroup ennea-field">
-            <label>Enneagram Type</label>
-            <select id="f-ennea-type" onchange="updateWingOptions()">
-              <option value="">— none / unknown —</option>
-              <option value="1">1 — Reformer</option>
-              <option value="2">2 — Helper</option>
-              <option value="3">3 — Achiever</option>
-              <option value="4">4 — Individualist</option>
-              <option value="5">5 — Investigator</option>
-              <option value="6">6 — Loyalist</option>
-              <option value="7">7 — Enthusiast</option>
-              <option value="8">8 — Challenger</option>
-              <option value="9">9 — Peacemaker</option>
-            </select>
-          </div>
-          <div class="fgroup ennea-field">
-            <label>Wing</label>
-            <select id="f-ennea-wing">
-              <option value="">— select type first —</option>
-            </select>
-          </div>
-          <div class="fgroup ennea-field">
-            <label>Instinct Variant</label>
-            <select id="f-ennea-instinct">
-              <option value="">— unknown —</option>
-              <option value="sp">sp — Self-Preservation</option>
-              <option value="sx">sx — Sexual / One-to-One</option>
-              <option value="so">so — Social</option>
-            </select>
-          </div>
-          <div class="fgroup ennea-field">
-            <label>Tritype (optional)</label>
-            <input type="text" id="f-ennea-tritype" placeholder="e.g. 459 or 5w4 / 9w8 / 4w5">
+      <!-- ── TRIAD RESONANCE MAP ── -->
+      <div class="card triad-card" id="triadCard">
+        <div class="deck-header">
+          <div class="card-title" style="margin-bottom:0;color:var(--orange)">Triad Resonance Map</div>
+          <span style="font-size:9px;letter-spacing:0.12em;color:var(--text-dim);font-family:var(--mono);text-transform:uppercase;">Enneagram · optional</span>
+        </div>
+        <div class="deck-subtitle">Hover a center · click a type node to inject enneagram params</div>
+
+        <div class="triad-grid-3" id="triadGrid3">
+          <!-- triads injected by JS -->
+        </div>
+
+        <div class="staging-strip" id="stagingStrip">
+          <span class="staging-lbl">params</span>
+          <div class="staging-values" id="stagingValues">
+            <span class="stag-p">enneagram: —</span>
+            <span class="stag-p">center: —</span>
+            <span class="stag-p">core fear: —</span>
+            <span class="stag-p">core desire: —</span>
+            <span class="stag-p">instinct: —</span>
           </div>
         </div>
+
+        <!-- Hidden real selects that addFriend() reads -->
+        <div style="display:none">
+          <select id="f-ennea-type" onchange="updateWingOptions()">
+            <option value="">— none / unknown —</option>
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+          </select>
+          <select id="f-ennea-wing"></select>
+          <select id="f-ennea-instinct">
+            <option value="">— unknown —</option>
+            <option value="sp">sp</option>
+            <option value="sx">sx</option>
+            <option value="so">so</option>
+          </select>
+          <input type="text" id="f-ennea-tritype">
+        </div>
+      </div>
+
+      <!-- Hidden trait sliders still present for addFriend() -->
+      <div style="display:none">
+        <input type="range" min="0" max="100" value="50" id="t-introverted" oninput="tv('introverted',this.value)">
+        <input type="range" min="0" max="100" value="50" id="t-intuitive"   oninput="tv('intuitive',this.value)">
+        <input type="range" min="0" max="100" value="50" id="t-thinking"    oninput="tv('thinking',this.value)">
+        <input type="range" min="0" max="100" value="50" id="t-judging"     oninput="tv('judging',this.value)">
+        <input type="range" min="0" max="100" value="50" id="t-assertive"   oninput="tv('assertive',this.value)">
+        <span id="v-introverted">50</span><span id="v-intuitive">50</span>
+        <span id="v-thinking">50</span><span id="v-judging">50</span><span id="v-assertive">50</span>
+        <span id="lb-introverted"></span><span id="lb-intuitive"></span>
+        <span id="lb-thinking"></span><span id="lb-judging"></span><span id="lb-assertive"></span>
       </div>
 
       <div class="btn-row" style="margin-top:4px;">
@@ -1858,9 +2082,364 @@ function buildEnneaDiagram(ta, tb, growA, stressA, growB, stressB) {
   </svg>`;
 }
 
+// ── MBTI CALIBRATION DECK ────────────────────────────────────────────────────
+
+const DECK_AXES = [
+  { key:'ie', left:'Introverted', right:'Extroverted', lCode:'I', rCode:'E', traitId:'introverted' },
+  { key:'ns', left:'Intuitive',   right:'Sensing',     lCode:'N', rCode:'S', traitId:'intuitive'  },
+  { key:'tf', left:'Thinking',    right:'Feeling',     lCode:'T', rCode:'F', traitId:'thinking'   },
+  { key:'jp', left:'Judging',     right:'Perceiving',  lCode:'J', rCode:'P', traitId:'judging'    },
+];
+
+const deckState = { ie:50, ns:50, tf:50, jp:50 };
+
+function buildDeck() {
+  const el = document.getElementById('deckAxes');
+  if (!el) return;
+  el.innerHTML = DECK_AXES.map(ax => `
+    <div class="axis-row" id="drow-${ax.key}">
+      <div class="axis-poles">
+        <span class="axis-pole lit" id="dpole-l-${ax.key}">${ax.left}</span>
+        <span class="axis-val-badge" id="dval-${ax.key}">50</span>
+        <span class="axis-pole" id="dpole-r-${ax.key}">${ax.right}</span>
+      </div>
+      <input type="range" class="deck-slider" min="0" max="100" value="50" step="1"
+        id="dslider-${ax.key}"
+        oninput="onDeckAxis('${ax.key}','${ax.lCode}','${ax.rCode}','${ax.traitId}',this.value)">
+    </div>
+  `).join('');
+
+  // also add assertive axis from variant select
+  DECK_AXES.forEach(ax => {
+    const sl = document.getElementById(`dslider-${ax.key}`);
+    if (sl) sl.style.setProperty('--pct', '50%');
+  });
+}
+
+function onDeckAxis(key, lCode, rCode, traitId, val) {
+  val = parseInt(val);
+  deckState[key] = val;
+  document.getElementById(`dslider-${key}`).style.setProperty('--pct', val + '%');
+  document.getElementById(`dval-${key}`).textContent = val;
+  document.getElementById(`dpole-l-${key}`).classList.toggle('lit', val <= 50);
+  document.getElementById(`dpole-r-${key}`).classList.toggle('lit', val > 50);
+
+  // Sync to hidden slider
+  const hiddenSlider = document.getElementById('t-' + traitId);
+  if (hiddenSlider) { hiddenSlider.value = val; tv(traitId, val); }
+
+  // Sync MBTI select from deck
+  const mbtiSel = document.getElementById('f-mbti');
+  if (mbtiSel) {
+    const cur = mbtiSel.value || 'INTJ';
+    const newType = [
+      deckState.ie <= 50 ? 'I':'E',
+      deckState.ns <= 50 ? 'N':'S',
+      deckState.tf <= 50 ? 'T':'F',
+      deckState.jp <= 50 ? 'J':'P',
+    ].join('');
+    const match = [...mbtiSel.options].find(o => o.value.startsWith(newType));
+    if (match) mbtiSel.value = match.value;
+  }
+
+  renderDeckBadge();
+  renderDeckTerminal();
+}
+
+function syncDeckFromSelects() {
+  const mbti = document.getElementById('f-mbti').value || 'INTJ';
+  const axes = { ie: mbti[0]==='I'?35:65, ns: mbti[1]==='N'?35:65, tf: mbti[2]==='T'?35:65, jp: mbti[3]==='J'?35:65 };
+  Object.entries(axes).forEach(([key, val]) => {
+    deckState[key] = val;
+    const sl = document.getElementById(`dslider-${key}`);
+    const vb = document.getElementById(`dval-${key}`);
+    const pl = document.getElementById(`dpole-l-${key}`);
+    const pr = document.getElementById(`dpole-r-${key}`);
+    if (sl) { sl.value = val; sl.style.setProperty('--pct', val + '%'); }
+    if (vb) vb.textContent = val;
+    if (pl) pl.classList.toggle('lit', val <= 50);
+    if (pr) pr.classList.toggle('lit', val > 50);
+  });
+  renderDeckBadge();
+  renderDeckTerminal();
+}
+
+function renderDeckBadge() {
+  const mbti = document.getElementById('f-mbti').value || '—';
+  const variant = document.getElementById('f-variant').value || 'A';
+  const badge = document.getElementById('deckBadge');
+  const liveBadge = document.getElementById('mbti-live-badge');
+  const txt = `${mbti}-${variant}`;
+  if (badge) badge.textContent = txt;
+  if (liveBadge) { liveBadge.textContent = txt; }
+}
+
+const DECK_DIAG = {
+  ie: v => v<=30?{c:'dt-ok',m:'deep introverted lock — internal processing dominant, social bandwidth constrained'}
+         :v<=50?{c:'dt-ok',m:'introverted bias — selective engagement, reserves energy for high-signal contexts'}
+         :v<=70?{c:'dt-warn',m:'extroverted drift — external stimulus dependency elevated, stimulus-seeking active'}
+               :{c:'dt-err',m:'EXTRO DOMINANT — attention capture bias critical, solitary output capacity degraded'},
+  ns: v => v<=30?{c:'dt-ok',m:'pure intuitive — pattern recognition overclocked, concrete detail dropout risk high'}
+         :v<=50?{c:'dt-ok',m:'intuitive primary — conceptual framing strong, may skip implementation friction'}
+         :v<=70?{c:'dt-warn',m:'sensing incline — grounded execution bias, abstract projection may under-index'}
+               :{c:'dt-err',m:'SENSOR DOMINANT — hyper-literal parsing active, strategic abstraction capacity low'},
+  tf: v => v<=30?{c:'dt-ok',m:'pure logic mode — decision substrate: cost-benefit, interpersonal data filtered out'}
+         :v<=50?{c:'dt-ok',m:'thinking bias — analytical throughput high, emotional signals treated as noise'}
+         :v<=70?{c:'dt-warn',m:'feeling incline — relational weighting elevated, conflict-aversion may suppress critique'}
+               :{c:'dt-err',m:'FEELING DOMINANT — emotional arbitration overrides logical routing routinely'},
+  jp: v => v<=30?{c:'dt-ok',m:'high-structure mode — execution locked to plan integrity, flex-tolerance near zero'}
+         :v<=50?{c:'dt-ok',m:'judging primary — agenda-driven, closure bias active, open loop aversion present'}
+         :v<=70?{c:'dt-warn',m:'perceiving drift — adaptive but plan-resistant, deadline friction likely'}
+               :{c:'dt-err',m:'PERCEIVER DOMINANT — structure rejection high, scope-creep and delay risk critical'},
+};
+
+function renderDeckTerminal() {
+  const term = document.getElementById('deckTerminal');
+  if (!term) return;
+  const mbti = document.getElementById('f-mbti').value || '—';
+  const variant = document.getElementById('f-variant').value || 'A';
+
+  const lines = [`<div class="dt-line"><span class="dt-prompt">▶</span><span style="color:var(--accent);letter-spacing:0.1em">[PSYCHE] calibrating: ${mbti}-${variant}</span></div>`];
+
+  DECK_AXES.forEach(ax => {
+    const v = deckState[ax.key];
+    if (Math.abs(v - 50) > 10) {
+      const d = DECK_DIAG[ax.key](v);
+      lines.push(`<div class="dt-line"><span class="dt-prompt">·</span><span class="${d.c}">${d.m}</span></div>`);
+    }
+  });
+
+  const gBias = Math.round((100 - deckState.ie) * 0.5 + (100 - deckState.jp) * 0.3);
+  const eFric = Math.round(Math.abs(deckState.tf - 50) * 0.6 + Math.abs(deckState.jp - 50) * 0.4);
+  lines.push(`<div class="dt-line"><span class="dt-prompt">·</span><span class="dt-dim">group orient bias: ${gBias}%  |  exec friction index: ${eFric}%</span></div>`);
+  lines.push(`<div class="dt-line"><span class="dt-prompt">▶</span><span class="dt-dim">hash: ${mbti}${variant}-${Date.now().toString(36).slice(-4).toUpperCase()} <span class="dt-cursor"></span></span></div>`);
+
+  term.innerHTML = lines.join('');
+}
+
+// ── TRIAD RESONANCE MAP ───────────────────────────────────────────────────────
+
+const TRIADS_DATA = [
+  {
+    id:'gut', cls:'t3-gut', name:'GUT CENTER', emo:'Instinct · Anger', types:[8,9,1],
+    desc:'Body-based knowing. Core drive: autonomy and right action.',
+    typeData:{
+      8:{fear:'being controlled',desire:'self-reliance',instinct:'challenge'},
+      9:{fear:'conflict & loss',desire:'inner peace',instinct:'mediation'},
+      1:{fear:'being corrupt',desire:'integrity',instinct:'correction'},
+    }
+  },
+  {
+    id:'heart', cls:'t3-heart', name:'HEART CENTER', emo:'Feeling · Shame', types:[2,3,4],
+    desc:'Image-driven cognition. Core drive: connection and worth.',
+    typeData:{
+      2:{fear:'being unloved',desire:'to be needed',instinct:'nurture'},
+      3:{fear:'worthlessness',desire:'admiration',instinct:'achievement'},
+      4:{fear:'no identity',desire:'authenticity',instinct:'depth'},
+    }
+  },
+  {
+    id:'head', cls:'t3-head', name:'HEAD CENTER', emo:'Thinking · Fear', types:[5,6,7],
+    desc:'Cognitive strategy engine. Core drive: security and competence.',
+    typeData:{
+      5:{fear:'incompetence',desire:'understanding',instinct:'observation'},
+      6:{fear:'abandonment',desire:'security',instinct:'alliance'},
+      7:{fear:'deprivation',desire:'satisfaction',instinct:'exploration'},
+    }
+  }
+];
+
+let triadActiveCenter = null;
+let triadActiveType   = null;
+
+function buildTriadMap() {
+  const grid = document.getElementById('triadGrid3');
+  if (!grid) return;
+  grid.innerHTML = TRIADS_DATA.map(tr => `
+    <div class="t3-card ${tr.cls}" id="t3c-${tr.id}"
+         onmouseenter="t3Hover('${tr.id}')"
+         onmouseleave="t3Leave('${tr.id}')">
+      <div class="t3-name">${tr.name}</div>
+      <div class="t3-emo">${tr.emo}</div>
+      <div class="t3-nodes" id="t3n-${tr.id}">
+        ${tr.types.map(t=>`<div class="t3-node" id="t3node-${t}" onclick="t3Select(${t},'${tr.id}')">${t}</div>`).join('')}
+      </div>
+      <div class="t3-vec-wrap"><canvas id="t3v-${tr.id}" height="32"></canvas></div>
+      <div class="t3-desc">${tr.desc}</div>
+    </div>
+  `).join('');
+
+  TRIADS_DATA.forEach(tr => {
+    const canvas = document.getElementById(`t3v-${tr.id}`);
+    if (!canvas) return;
+    const W = canvas.parentElement.offsetWidth || 160;
+    canvas.width = W;
+    const ctx = canvas.getContext('2d');
+    const cols = { gut:'#ff9100', heart:'#ff4d6d', head:'#00e5ff' };
+    const c = cols[tr.id];
+    const n = tr.types.length;
+    const pts = tr.types.map((_,i)=>({ x:(i/(n-1))*(W-16)+8, y:16 }));
+    ctx.strokeStyle = c + '44'; ctx.lineWidth = 1;
+    ctx.setLineDash([3,5]);
+    ctx.beginPath();
+    pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+    pts.forEach(p => {
+      ctx.fillStyle = c + '30'; ctx.strokeStyle = c + '80';
+      ctx.lineWidth = 1; ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2);
+      ctx.fill(); ctx.stroke();
+    });
+  });
+}
+
+function t3Hover(id) {
+  const tr = TRIADS_DATA.find(t=>t.id===id);
+  document.getElementById(`t3c-${id}`)?.classList.add('t3-selected');
+  tr.types.forEach(t => {
+    const el = document.getElementById(`t3node-${t}`);
+    if (el && el !== document.getElementById(`t3node-${triadActiveType}`)) el.classList.add('t3-lit');
+  });
+}
+
+function t3Leave(id) {
+  if (triadActiveCenter !== id) {
+    document.getElementById(`t3c-${id}`)?.classList.remove('t3-selected');
+    const tr = TRIADS_DATA.find(t=>t.id===id);
+    tr.types.forEach(t => {
+      const el = document.getElementById(`t3node-${t}`);
+      if (el && t !== triadActiveType) el.classList.remove('t3-lit');
+    });
+  }
+}
+
+// ── Wing math: boundary-wrapping per Enneagram theory ─────────────────────────
+// Type 1 wraps to 9 and 2; Type 9 wraps to 8 and 1; all others ± 1
+function calcWings(type) {
+  const low  = type === 1 ? 9 : type - 1;
+  const high = type === 9 ? 1 : type + 1;
+  return [low, high];
+}
+
+// Tracks the active wing so stagingStrip stays consistent across re-renders
+let triadActiveWing = null;
+
+function t3Select(type, centerId) {
+  // ── 1. Clear previous node highlight (different type, same or different center)
+  if (triadActiveType !== null && triadActiveType !== type) {
+    const old = document.getElementById(`t3node-${triadActiveType}`);
+    if (old) old.classList.remove('t3-active', 't3-lit');
+  }
+
+  // ── 2. If switching centers, deselect the old center card entirely
+  if (triadActiveCenter && triadActiveCenter !== centerId) {
+    document.getElementById(`t3c-${triadActiveCenter}`)?.classList.remove('t3-selected');
+    const oldTr = TRIADS_DATA.find(t => t.id === triadActiveCenter);
+    oldTr?.types.forEach(t => {
+      document.getElementById(`t3node-${t}`)?.classList.remove('t3-lit', 't3-active');
+    });
+  }
+
+  // ── 3. Reset active wing whenever a new core type is picked
+  triadActiveType   = type;
+  triadActiveCenter = centerId;
+  triadActiveWing   = null;
+
+  // ── 4. Activate the clicked node
+  const node = document.getElementById(`t3node-${type}`);
+  if (node) node.classList.add('t3-active', 't3-lit');
+  document.getElementById(`t3c-${centerId}`)?.classList.add('t3-selected');
+
+  // ── 5. Sync the hidden type select so addFriend() picks it up correctly
+  const typeEl = document.getElementById('f-ennea-type');
+  if (typeEl) {
+    typeEl.value = String(type);
+    updateWingOptions();          // keeps the hidden wing <select> in sync
+  }
+
+  // ── 6. Clear hidden wing select until user explicitly picks one
+  const wingEl = document.getElementById('f-ennea-wing');
+  if (wingEl) wingEl.value = '';
+
+  // ── 7. Render the staging strip with core metadata + interactive wing chips
+  const tr    = TRIADS_DATA.find(t => t.id === centerId);
+  const tData = tr?.typeData[type];
+  if (tData) renderStagingWithWings(type, centerId, tData, tr.emo.split('·')[0].trim());
+}
+
+// ── Renders the full staging strip: core params + clickable wing chips ─────────
+function renderStagingWithWings(type, centerId, data, center) {
+  const [wingA, wingB] = calcWings(type);
+  const stripEl        = document.getElementById('stagingValues');
+  if (!stripEl) return;
+
+  // Build the HTML — core archetype param + two interactive wing chips
+  stripEl.innerHTML = `
+    <span class="stag-p stag-on" id="stag-archetype">archetype: ${type}</span>
+    <span class="stag-p stag-on">center: ${center.toLowerCase()}</span>
+    <span class="stag-p stag-on">core fear: ${data.fear}</span>
+    <span class="stag-p stag-on">core desire: ${data.desire}</span>
+    <span class="stag-p" style="color:var(--text-dim);letter-spacing:0.06em;">wing →</span>
+    <span class="stag-p sel-chip t3-wing-chip" id="wing-chip-${wingA}"
+          onclick="t3SelectWing(${type}, ${wingA})"
+          title="Wing ${wingA}">w${wingA}</span>
+    <span class="stag-p sel-chip t3-wing-chip" id="wing-chip-${wingB}"
+          onclick="t3SelectWing(${type}, ${wingB})"
+          title="Wing ${wingB}">w${wingB}</span>
+  `;
+}
+
+// ── Handles wing chip tap: toggles chip state, updates archetype label + hidden select ──
+function t3SelectWing(coreType, wing) {
+  const chipA = document.getElementById(`wing-chip-${calcWings(coreType)[0]}`);
+  const chipB = document.getElementById(`wing-chip-${calcWings(coreType)[1]}`);
+  const archetypeEl = document.getElementById('stag-archetype');
+
+  // Clicking the already-active wing deselects it (toggle off)
+  if (triadActiveWing === wing) {
+    triadActiveWing = null;
+    [chipA, chipB].forEach(c => c?.classList.remove('on'));
+    if (archetypeEl) archetypeEl.textContent = `archetype: ${coreType}`;
+    const wingEl = document.getElementById('f-ennea-wing');
+    if (wingEl) wingEl.value = '';
+    return;
+  }
+
+  // Select new wing
+  triadActiveWing = wing;
+  [chipA, chipB].forEach(c => c?.classList.remove('on'));
+  document.getElementById(`wing-chip-${wing}`)?.classList.add('on');
+
+  // Update archetype display to compiled format e.g. "5w4"
+  if (archetypeEl) archetypeEl.textContent = `archetype: ${coreType}w${wing}`;
+
+  // ── Data bridge: write compiled wing value into the hidden select ──
+  const wingEl = document.getElementById('f-ennea-wing');
+  if (wingEl) {
+    // updateWingOptions() populates options as "5w4", "5w6" etc.
+    // Find the matching option and select it
+    const target = `${coreType}w${wing}`;
+    const opt = [...wingEl.options].find(o => o.value === target);
+    if (opt) {
+      wingEl.value = target;
+    } else {
+      // Fallback: inject the option if updateWingOptions() hasn't run yet
+      const newOpt = document.createElement('option');
+      newOpt.value = target;
+      newOpt.textContent = target;
+      wingEl.appendChild(newOpt);
+      wingEl.value = target;
+    }
+  }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 updateTraitLabels();
 loadFriends();
+buildDeck();
+buildTriadMap();
+renderDeckBadge();
+renderDeckTerminal();
 </script>
 </body>
 </html>
