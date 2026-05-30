@@ -166,6 +166,7 @@ body::before {
   cursor:pointer;
   transition: all 0.15s;
   display:flex; align-items:center; justify-content:space-between;
+  text-decoration: none;
 }
 
 .profile-card:hover { border-color: var(--border2); background: var(--bg4); }
@@ -1291,15 +1292,15 @@ function renderFriendList() {
     const ea = f.enneagram || {};
     const enneaStr = ea.type ? `E${ea.type}${ea.wing ? 'w'+(ea.wing||'').split('w')[1] : ''}${ea.instinct?' '+ea.instinct:''}` : '';
     return `
-      <div class="profile-card ${mine ? 'is-mine' : ''}">
+      <a href="/personality/${f.name}" class="profile-card ${mine ? 'is-mine' : ''}">
         <div class="pc-left">
           <div class="pc-name">${f.name}</div>
           <div class="pc-type">${f.mbti}-${f.variant || '?'} · ${MBTI_DESC[f.mbti] || ''}</div>
           ${enneaStr ? `<div class="pc-ennea">✦ ${enneaStr}</div>` : ''}
           <div class="pc-owner">by ${f.owner || 'unknown'}</div>
         </div>
-        ${mine ? `<span class="pc-del" onclick="deleteFriend('${f.name}')">×</span>` : ''}
-      </div>
+        ${mine ? `<span class="pc-del" onclick="event.preventDefault(); deleteFriend('${f.name}')">×</span>` : ''}
+      </a>
     `;
   }).join('');
 }

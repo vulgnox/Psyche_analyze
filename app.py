@@ -326,8 +326,22 @@ def index():
 def personality():
     return render_template('personality.html',
         friends=load_friends(),
-        current_user=current_user()
+        current_user=current_user(),
+        selected_friend=None
     )
+
+@app.route('/personality/<name>')
+@login_required
+def personality_detail(name):
+    friends = load_friends()
+    friend = next((f for f in friends if f['name'].lower() == name.lower()), None)
+    if friend:
+        return render_template('personality.html',
+            friends=[friend],
+            current_user=current_user(),
+            selected_friend=friend['name']
+        )
+    return redirect('/personality')
 
 @app.route('/api/friends', methods=['GET'])
 @login_required

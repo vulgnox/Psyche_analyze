@@ -165,6 +165,7 @@ body::before {
   cursor:pointer;
   transition: all 0.15s;
   display:flex; align-items:center; justify-content:space-between;
+  text-decoration: none;
 }
 
 .profile-card:hover { border-color: var(--border2); background: var(--bg4); }
@@ -313,7 +314,7 @@ body::before {
     <div class="sidebar-label">Profiles</div>
     {% if friends %}
       {% for f in friends %}
-        <div class="profile-card">
+        <a href="/personality/{{ f.name }}" class="profile-card{% if selected_friend == f.name %} is-mine{% endif %}">
           <div class="pc-left">
             <div class="pc-name">{{ f.name }}</div>
             <div class="pc-type">{{ f.mbti }}-{{ f.variant or '?' }}</div>
@@ -321,7 +322,7 @@ body::before {
               <div class="pc-ennea">✦ E{{ f.enneagram.type }}{% if f.enneagram.wing %}w{{ f.enneagram.wing.split('w')[1] }}{% endif %}</div>
             {% endif %}
           </div>
-        </div>
+        </a>
       {% endfor %}
     {% else %}
       <div class="empty-state">no profiles yet</div>
