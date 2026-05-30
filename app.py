@@ -321,6 +321,14 @@ def index():
         current_user=current_user()
     )
 
+@app.route('/personality')
+@login_required
+def personality():
+    return render_template('personality.html',
+        friends=load_friends(),
+        current_user=current_user()
+    )
+
 @app.route('/api/friends', methods=['GET'])
 @login_required
 def get_friends():
