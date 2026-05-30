@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSYCHE — Personality Breakdown</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #060810;
+  --bg2:      #0c0f1a;
+  --bg3:      #111520;
+  --bg4:      #171c2a;
+  --bg5:      #1e243a;
+  --border:   #1f2740;
+  --border2:  #2a3450;
+  --accent:   #00e5ff;
+  --accent2:  #7c4dff;
+  --accent3:  #ff4d6d;
+  --green:    #00e676;
+  --yellow:   #ffd740;
+  --orange:   #ff9100;
+  --text:     #b0bcd4;
+  --text-dim: #44536e;
+  --text-hi:  #e8edf8;
+  --mono:     'IBM Plex Mono', monospace;
+  --display:  'Rajdhani', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none; z-index:0;
+}
+
+/* ── Top bar ── */
+.topbar {
+  position:sticky; top:0; z-index:100;
+  background: rgba(6,8,16,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  color: var(--text-hi);
+  display:flex; align-items:center; gap:10px;
+}
+
+.logo-dot {
+  width:6px; height:6px;
+  background: var(--accent);
+  border-radius:50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse-dot 2s ease infinite;
+}
+
+@keyframes pulse-dot {
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%{ opacity:0.5; transform:scale(0.7); }
+}
+
+.topbar-right { display:flex; align-items:center; gap:20px; }
+
+.user-badge {
+  display:flex; align-items:center; gap:8px;
+  padding: 5px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.user-badge .uname { color: var(--accent); }
+
+.logout-btn {
+  background:none; border:none; cursor:pointer;
+  color: var(--text-dim); font-family: var(--mono);
+  font-size: 11px; letter-spacing: 0.1em;
+  padding: 5px 10px;
+  transition: color 0.15s;
+}
+.logout-btn:hover { color: var(--accent3); }
+
+/* ── Nav tabs ── */
+.nav-strip {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display:flex; gap:0;
+  position:sticky; top:56px; z-index:99;
+  overflow-x: auto;
+}
+
+.nav-tab {
+  background:none; border:none; cursor:pointer;
+  font-family: var(--mono); font-size:11px;
+  letter-spacing: 0.12em; text-transform:uppercase;
+  color: var(--text-dim);
+  padding: 14px 20px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+  display:flex; align-items:center; gap:8px;
+  white-space: nowrap;
+}
+
+.nav-tab .nav-ico { font-size:13px; }
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Main layout ── */
+.shell {
+  display:grid;
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 97px);
+  position:relative; z-index:1;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: 20px 16px;
+  display:flex; flex-direction:column; gap:6px;
+  background: var(--bg2);
+}
+
+.sidebar-label {
+  font-size:9px; letter-spacing:0.2em;
+  color: var(--text-dim); text-transform:uppercase;
+  padding: 4px 8px;
+  margin-top:4px;
+}
+
+.profile-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 10px 12px;
+  cursor:pointer;
+  transition: all 0.15s;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+.profile-card:hover { border-color: var(--border2); background: var(--bg4); }
+.profile-card.is-mine { border-left: 2px solid var(--accent2); }
+
+.pc-left { display:flex; flex-direction:column; gap:3px; }
+.pc-name { color: var(--text-hi); font-size:12px; font-weight:500; }
+.pc-type { color: var(--accent); font-size:10px; letter-spacing:0.06em; }
+.pc-ennea { color: var(--orange); font-size:9px; letter-spacing:0.04em; margin-top:1px; }
+.pc-owner { color: var(--text-dim); font-size:9px; letter-spacing:0.04em; }
+
+.pc-del {
+  color: var(--text-dim); font-size:16px; line-height:1;
+  opacity:0; transition:0.15s; cursor:pointer; padding:2px 4px;
+  border-radius:2px;
+}
+.profile-card:hover .pc-del { opacity:1; }
+.pc-del:hover { color: var(--accent3); background: rgba(255,77,109,0.1); }
+
+.empty-state {
+  color: var(--text-dim); font-size:11px;
+  letter-spacing:0.06em; padding:12px 8px;
+  line-height:1.7;
+}
+
+/* ── Main content ── */
+.main { padding:28px 32px; max-width:960px; }
+
+.panel { display:none; }
+.panel.active { display:block; animation: fadeIn 0.2s ease; }
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Card system ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-family: var(--display);
+  font-size:13px; font-weight:600;
+  letter-spacing:0.15em; text-transform:uppercase;
+  color: var(--text-dim);
+  margin-bottom:16px;
+  display:flex; align-items:center; gap:8px;
+}
+
+.card-title::before {
+  content:'';
+  width:3px; height:14px;
+  background: var(--accent);
+  border-radius:2px;
+  box-shadow: 0 0 6px var(--accent);
+}
+
+.card-title.ennea::before { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+
+/* ── Panel header ── */
+.panel-header { margin-bottom:24px; }
+
+.panel-title {
+  font-family: var(--display);
+  font-size:26px; font-weight:700;
+  letter-spacing:0.08em;
+  color: var(--text-hi);
+  line-height:1;
+}
+
+.panel-sub {
+  color: var(--text-dim); font-size:11px;
+  letter-spacing:0.1em; margin-top:6px;
+}
+
+/* ── Trait bars ── */
+.bar-group { margin-bottom:20px; }
+
+.bar-row-label {
+  display:flex; justify-content:space-between;
+  font-size:9px; letter-spacing:0.06em; color:var(--text-dim);
+  margin-bottom:4px;
+}
+
+.bar-track {
+  height:3px; background:var(--bg4); border-radius:2px;
+  overflow:hidden; margin-bottom:8px;
+}
+
+.bar-fill {
+  height:100%; border-radius:2px;
+  transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Enneagram info ── */
+.ennea-info {
+  display:flex; flex-wrap:wrap; gap:12px;
+  margin-bottom:16px;
+}
+
+.ennea-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px;
+  border-radius:2px; font-size:10px; letter-spacing:0.08em;
+  margin:3px 0;
+}
+
+.ennea-tag.gut   { background:rgba(255,145,0,0.1); color:var(--orange); border:1px solid rgba(255,145,0,0.2); }
+.ennea-tag.heart { background:rgba(255,77,109,0.1); color:var(--accent3); border:1px solid rgba(255,77,109,0.2); }
+.ennea-tag.head  { background:rgba(0,229,255,0.1); color:var(--accent); border:1px solid rgba(0,229,255,0.2); }
+
+/* ── Back link ── */
+.back-link {
+  display:inline-block; margin-top:20px;
+  color:var(--accent2); font-size:10px; letter-spacing:0.12em;
+  text-decoration:none; transition:color 0.15s;
+}
+.back-link:hover { color:var(--text-hi); }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    PSYCHE
+  </div>
+  <div class="topbar-right">
+    <div class="user-badge">logged in as <span class="uname">{{ current_user }}</span></div>
+    <a href="/logout"><button class="logout-btn">logout</button></a>
+  </div>
+</div>
+
+<!-- Nav tabs -->
+<div class="nav-strip">
+  <a href="/app" class="nav-tab"><span class="nav-ico">←</span> Back to App</a>
+  <button class="nav-tab active" disabled><span class="nav-ico">⚡</span> Personality Breakdown</button>
+</div>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-label">Profiles</div>
+    {% if friends %}
+      {% for f in friends %}
+        <div class="profile-card">
+          <div class="pc-left">
+            <div class="pc-name">{{ f.name }}</div>
+            <div class="pc-type">{{ f.mbti }}-{{ f.variant or '?' }}</div>
+            {% if f.enneagram and f.enneagram.type %}
+              <div class="pc-ennea">✦ E{{ f.enneagram.type }}{% if f.enneagram.wing %}w{{ f.enneagram.wing.split('w')[1] }}{% endif %}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">no profiles yet</div>
+    {% endif %}
+    <a href="/app" style="
+      display:block; margin-top:auto; padding:10px 8px;
+      color:var(--accent2); font-size:10px; letter-spacing:0.12em;
+      text-decoration:none; border-top:1px solid var(--border);
+      transition:color 0.15s;
+    " onmouseover="this.style.color='var(--text-hi)'" onmouseout="this.style.color='var(--accent2)'">
+      ↗ back to main app
+    </a>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="panel-header">
+      <div class="panel-title">Personality Breakdown</div>
+      <div class="panel-sub">detailed trait & enneagram analysis for each profile</div>
+    </div>
+
+    {% if friends %}
+      {% for f in friends %}
+        <div class="card">
+          <div class="card-title">{{ f.name }} — {{ f.mbti }}-{{ f.variant or '?' }} ({{ f.mbti[:4] }})</div>
+
+          <!-- MBTI Traits -->
+          <div class="bar-group">
+            {% set traits = f.traits or {} %}
+            {% set labels = {
+              'introverted': 'Introverted' if f.mbti[0] == 'I' else 'Extroverted',
+              'intuitive':   'Intuitive'   if f.mbti[1] == 'N' else 'Sensing',
+              'thinking':    'Thinking'    if f.mbti[2] == 'T' else 'Feeling',
+              'judging':     'Judging'     if f.mbti[3] == 'J' else 'Perceiving',
+              'assertive':   'Assertive'   if f.variant == 'A' else 'Turbulent'
+            } %}
+            {% for trait in ['introverted','intuitive','thinking','judging','assertive'] %}
+              {% set val = traits.get(trait, 50) %}
+              <div class="bar-row-label">
+                <span>{{ labels[trait] }}</span>
+                <span>{{ val }}%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:{{ val }}%;background:{% if val >= 75 %}#00e676{% elif val >= 50 %}#ffd740{% else %}#ff4d6d{% endif %};"></div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Enneagram -->
+          {% if f.enneagram and f.enneagram.type %}
+            {% set ea = f.enneagram %}
+            {% set t = ea.type|int %}
+            {% set center = '' %}
+            {% if t in [8,9,1] %}{% set center = 'gut' %}{% elif t in [2,3,4] %}{% set center = 'heart' %}{% else %}{% set center = 'head' %}{% endif %}
+            <div class="card-title ennea">Enneagram</div>
+            <div class="ennea-info">
+              <span class="ennea-tag {{ center }}">Type {{ t }} — {{ {
+                1:'Reformer',2:'Helper',3:'Achiever',4:'Individualist',
+                5:'Investigator',6:'Loyalist',7:'Enthusiast',8:'Challenger',9:'Peacemaker'
+              }[t] }}</span>
+              {% if ea.wing %}<span class="ennea-tag {{ center }}">Wing {{ ea.wing }}</span>{% endif %}
+              {% if ea.instinct %}<span class="ennea-tag {{ center }}">Instinct {{ ea.instinct }}</span>{% endif %}
+              {% if ea.tritype %}<span class="ennea-tag {{ center }}">Tritype {{ ea.tritype }}</span>{% endif %}
+            </div>
+            <div style="font-size:10px;color:var(--text-dim);line-height:1.8;">
+              {% set growth = {1:7,2:4,3:6,4:1,5:8,6:9,7:5,8:2,9:3}[t] %}
+              {% set stress = {1:4,2:8,3:9,4:2,5:7,6:3,7:1,8:5,9:6}[t] %}
+              Growth direction: Type {{ growth }} ({{ {
+                1:'Reformer',2:'Helper',3:'Achiever',4:'Individualist',
+                5:'Investigator',6:'Loyalist',7:'Enthusiast',8:'Challenger',9:'Peacemaker'
+              }[growth] }})<br>
+              Stress direction: Type {{ stress }} ({{ {
+                1:'Reformer',2:'Helper',3:'Achiever',4:'Individualist',
+                5:'Investigator',6:'Loyalist',7:'Enthusiast',8:'Challenger',9:'Peacemaker'
+              }[stress] }})
+            </div>
+          {% else %}
+            <div style="font-size:10px;color:var(--text-dim);">No Enneagram data</div>
+          {% endif %}
+
+          <!-- Notes -->
+          {% if f.notes %}
+            <div style="margin-top:12px;font-size:10px;color:var(--text-dim);letter-spacing:0.06em;">
+              Notes: {{ f.notes }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card">
+        <div class="empty-state">No profiles added yet. Go to the main app to add some.</div>
+      </div>
+    {% endif %}
+
+    <a href="/app" class="back-link">← back to main app</a>
+  </div>
+</div>
+
+</body>
+</html>
